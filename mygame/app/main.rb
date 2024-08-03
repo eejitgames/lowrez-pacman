@@ -53,6 +53,8 @@ def init(args)
     grid_x: 16, # where pacman is in the maze
     grid_y: 10, # where pacman is in the maze
     dir: 0, # 1 up, 2 right, 3 down, 4 left (0 for stationary until a key is pressed)
+    move_x: 0,
+    move_y: 0,
     speed: 4
   }
 
@@ -97,32 +99,98 @@ def grid_highlight(args)
   }
 end
 
-def point_to_grid(args)
+def point_to_grid(args, point_x, point_y)
   # determine which grid section a point is in
   size_x = 4 # 136 / 34
   size_y = 4 # 148 / 37
 
-  args.state.pacman.grid_x = ((32 + args.state.pacman.mx) / size_x).floor
-  args.state.pacman.grid_y = ((31 + args.state.pacman.my) / size_y).floor
+  args.state.pacman.grid_x = (point_x / size_x).floor
+  args.state.pacman.grid_y = (point_y / size_y).floor
+
+  #return args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x]
 end
+
+=begin
+def player_input
+  if @pacman[:dx] == 0 && @maze[@pacman[:y] + 1][@pacman[:x]] == 0 && inputs.up
+    @pacman[:dir] = 1
+  elsif @pacman[:dy] == 0 && @maze[@pacman[:y]][@pacman[:x] + 1] == 0 && inputs.right
+    @pacman[:dir] = 2
+  elsif @pacman[:dx] == 0 && @maze[@pacman[:y] - 1][@pacman[:x]] == 0 && inputs.down
+    @pacman[:dir] = 3
+  elsif @pacman[:dy] == 0 && @maze[@pacman[:y]][@pacman[:x] - 1] == 0 && inputs.left
+    @pacman[:dir] = 4
+  end
+end
+=end
 
 # 1 up, 2 right, 3 down, 4 left (0 for stationary until a key is pressed)
 def player_input(args)
   return unless args.state.tick_count.zmod? 2
+
+  move_x = args.state.pacman.move_x
+  move_y = args.state.pacman.move_y
+
+  point_x = 32 + args.state.pacman.mx
+  point_y = 31 + args.state.pacman.my
+
   if args.inputs.up
-    args.state.pacman[:dir] = 1
-    args.state.pacman.my += 1 if (32 + args.state.pacman.my) < 148
+    if (32 + args.state.pacman.my) < 148 && (((args.state.pacman.mx - 1) % 4) == 0) && (args.state.maze[(point_y/ 4).floor + 1][(point_x / 4).floor] == 0)
+      args.state.pacman[:dir] = 1
+      move_y = 1
+      move_x = 0
+    end
   elsif args.inputs.right
-    args.state.pacman[:dir] = 2
-    args.state.pacman.mx += 1 if (33 + args.state.pacman.mx) < 136
+    if (33 + args.state.pacman.mx) < 136 && (((args.state.pacman.my + 1) % 4) == 0) && (args.state.maze[(point_y / 4).floor][(point_x / 4).floor + 1] == 0)
+      args.state.pacman[:dir] = 2
+      move_x = 1
+      move_y = 0
+      safe_y = args.state.pacman.my
+    end
   elsif args.inputs.down
-    args.state.pacman[:dir] = 3
-    args.state.pacman.my -= 1 if (32 + args.state.pacman.my) > 1
+    if (32 + args.state.pacman.my) > 1 && (((args.state.pacman.mx - 1) % 4) == 0) && (args.state.maze[(point_y/ 4).floor - 1][(point_x / 4).floor] == 0)
+      args.state.pacman[:dir] = 3
+      move_y = -1
+      move_x = 0
+    end
   elsif args.inputs.left
-    args.state.pacman[:dir] = 4
-    args.state.pacman.mx -= 1 if (33 + args.state.pacman.mx) > 1
+    if (33 + args.state.pacman.mx) > 1 && (((args.state.pacman.my + 1) % 4) == 0) && (args.state.maze[(point_y / 4).floor][(point_x / 4).floor - 1] == 0)
+      args.state.pacman[:dir] = 4
+      move_x = -1
+      move_y = 0
+    end
   end
-  point_to_grid args
+
+  # update grid_x and grid_y by calling this - horrible side effect abuse change these functions
+  # temp = point_to_grid args, (32 + args.state.pacman.mx + move_x), (31 + args.state.pacman.my + move_y)
+
+  grid_x_before = args.state.pacman.grid_x
+  grid_y_before = args.state.pacman.grid_y
+
+  case args.state.pacman[:dir]
+    when 1
+      temp = point_to_grid args, (32 + args.state.pacman.mx + move_x), (31 + args.state.pacman.my + move_y + 1)
+    when 2
+      temp = point_to_grid args, (32 + args.state.pacman.mx + move_x + 2), (31 + args.state.pacman.my + move_y)
+    when 3
+      temp = point_to_grid args, (32 + args.state.pacman.mx + move_x), (31 + args.state.pacman.my + move_y - 2)
+    when 4
+      temp = point_to_grid args, (32 + args.state.pacman.mx + move_x - 1), (31 + args.state.pacman.my + move_y)
+  end
+
+  if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] != 0
+    args.state.pacman.grid_x = grid_x_before
+    args.state.pacman.grid_y = grid_y_before
+    move_x = 0
+    move_y = 0
+  end
+
+  args.state.pacman.move_x = move_x
+  args.state.pacman.move_y = move_y
+  args.state.pacman.mx += move_x
+  args.state.pacman.my += move_y
+
+  point_to_grid args, (32 + args.state.pacman.mx), (31 + args.state.pacman.my)
 end
 
 def draw_pacman(args)
@@ -234,3 +302,4 @@ def render_debug(args)
 end
 
 $gtk.reset
+$gtk.disable_framerate_warning!

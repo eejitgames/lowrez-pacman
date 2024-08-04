@@ -60,6 +60,14 @@ def init(args)
     speed: 4
   }
 
+  args.state.red_ghost = {
+    x: 32,
+    y: 32,
+    hx: 28,
+    hy: 35,
+    dir: 0,
+  }
+
   args.state.tunnel_left = :off
   args.state.tunnel_right = :off
 
@@ -80,12 +88,22 @@ def tick(args)
   draw_score args
   draw_lives args
   # draw_tunnel args
+  draw_red_ghost args
   draw_pacman args
 
   return if game_has_lost_focus?
 
   player_input args
+
+  return if args.state.pacman.dir == 0
+  move_red_ghost args
   # render_debug args
+end
+
+def draw_red_ghost(args)
+end
+
+def move_red_ghost(args)
 end
 
 def draw_dots(args)
@@ -137,7 +155,7 @@ end
 
 def draw_score(args)
   args.lowrez.labels  << {
-    x: 32,
+    x: 33,
     y: 63,
     text: "#{args.state.pacman.score}",
     size_enum: LOWREZ_FONT_TI,
@@ -145,6 +163,22 @@ def draw_score(args)
     r: 100,
     g: 100,
     b: 100,
+    a: 255,
+    font: LOWREZ_FONT_PATH
+  }
+  draw_ready args if args.state.pacman.dir == 0
+end
+
+def draw_ready(args)
+  args.lowrez.labels  << {
+    x: 34,
+    y: 57,
+    text: "Ready!",
+    size_enum: LOWREZ_FONT_TI,
+    alignment_enum: 1,
+    r: 0xF4, # f4ec9b
+    g: 0xEC,
+    b: 0x9B,
     a: 255,
     font: LOWREZ_FONT_PATH
   }

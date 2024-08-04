@@ -68,6 +68,8 @@ def init(args)
   }
 
   args.state.red_ghost = {
+    x: 67,
+    y: 90,
     mx: 35,
     my: 79,
     hx: 16, # grid coors, home corner when scatter mode
@@ -76,7 +78,7 @@ def init(args)
     grid_y: 22,
     move_x: 0,
     move_y: 0,
-    dir: 0,
+    dir: 4
   }
 
   # to position sprite correctly
@@ -100,13 +102,14 @@ def tick(args)
   render_debug args
   return if game_has_lost_focus?
   player_input args
-  return if args.state.pacman.dir == 0
-  move_red_ghost args
+  return if args.state.pacman.dir == 0 # pacman has not moved yet, the game has not started
+  move_red_ghost args if Kernel.tick_count.zmod? 60
+  grid_highlight_red_ghost args
 end
 
 def move_red_ghost(args)
   # point_to_grid args, (32 + args.state.pacman.mx), (31 + args.state.pacman.my)
-  # point_to_grid_red_ghost args, 0, 0 # (0 - args.state.red_ghost.mx), (0 - args.state.red_ghost.my)
+  point_to_grid_red_ghost args, args.state.red_ghost.x, args.state.red_ghost.y
 end
 
 def draw_dots(args)
@@ -472,15 +475,14 @@ def render_debug(args)
     "args.lowrez.mouse_position is:  #{args.lowrez.mouse_position.x}, #{args.lowrez.mouse_position.y}",
     # "args.lowrez.mouse_down tick:    #{args.state.last_click || "never"}",
     # "args.lowrez.mouse_up tick:      #{args.state.last_up || "false"}",
-    "pixel position in map mx, my:   #{32 + args.state.pacman.mx}, #{31 + args.state.pacman.my}",
+    # "pixel position in map mx, my:   #{32 + args.state.pacman.mx}, #{31 + args.state.pacman.my}",
     "grid position grid_x, grid_y:   #{args.state.pacman.grid_x}, #{args.state.pacman.grid_y}",
-    "pacman coors on screen x, y:    #{args.state.pacman[:x] + args.state.offset[args.state.pacman.dir].x}, #{args.state.pacman[:y] + args.state.offset[args.state.pacman.dir].y}",
+    # "pacman coors on screen x, y:    #{args.state.pacman[:x] + args.state.offset[args.state.pacman.dir].x}, #{args.state.pacman[:y] + args.state.offset[args.state.pacman.dir].y}",
     # "maze status at grid coors:      #{args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x]}",
-    "red ghost map pos mx, my:       #{32 + args.state.red_ghost.mx}, #{31 + args.state.red_ghost.my}",
+    # "red ghost map pos mx, my:       #{32 + args.state.red_ghost.mx}, #{31 + args.state.red_ghost.my}",
     "red ghost grid grid_x, grid_y:  #{args.state.red_ghost.grid_x}, #{args.state.red_ghost.grid_y}",
-    "red ghost screen coors x, y:    #{args.state.red_ghost[:x]}, #{args.state.red_ghost[:y]}",
-    "args.state.map_origin_x:        #{args.state.map_origin_x}",
-    "args.state.map_origin_y:        #{args.state.map_origin_y}"
+    # "red ghost screen coors x, y:    #{args.state.red_ghost[:x]}, #{args.state.red_ghost[:y]}",
+    # "args.state.map_origin_x, oy:    #{args.state.map_origin_x}, #{args.state.map_origin_y}"
   ]
 
   args.outputs.debug << args.state

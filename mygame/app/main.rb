@@ -81,51 +81,34 @@ def tick(args)
   return if game_has_lost_focus?
 
   player_input args
-  render_debug args
+  # render_debug args
 end
 
 def draw_dots(args)
-  # color ffb7ff
-  # args.state.maze 34x37 grid
-  #args.lowrez.primitives << {
-  #  x: args.state.pacman[:x],
-  #  y: args.state.pacman[:y],
-  #  w: 1,
-  #  h: 1,
-  #  r: 200,
-  #  g: 200,
-  #  b: 200,
-  #  a: 200,
-  #  path: :pixel
-  #}
-
   args.state.maze.each_with_index do |row, row_index|
     row.each_with_index do |value, col_index|
       if value == 1
-      # puts "Value at [#{row_index}, #{col_index}] is #{value}"
-      # x = grid_x * grid_size - args.state.pacman.mx
-      # y = grid_y * grid_size - args.state.pacman.my
-      args.lowrez.primitives << {
-        x: (col_index * 4 - args.state.pacman.mx) + 1,
-        y: (row_index * 4 - args.state.pacman.my) + 2,
-        w: 1,
-        h: 1,
-        r: 200,
-        g: 200,
-        b: 200,
-        a: 200,
-        path: :pixel
-      }
+        args.lowrez.primitives << {
+          x: (col_index * 4 - args.state.pacman.mx) + 1,
+          y: (row_index * 4 - args.state.pacman.my) + 2,
+          w: 1,
+          h: 1,
+          r: 255,
+          g: 183,
+          b: 255,
+          a: 160,
+          path: :pixel
+        }
       elsif value == 2
         args.lowrez.primitives << {
           x: (col_index * 4 - args.state.pacman.mx),
           y: (row_index * 4 - args.state.pacman.my) + 1,
           w: 3,
           h: 3,
-          r: 200,
-          g: 200,
-          b: 200,
-          a: 200,
+          r: 0xFF,
+          g: 183,
+          b: 0xFF,
+          a: 160,
           path: :pixel
         }
       end
@@ -303,6 +286,7 @@ def draw_maze(args)
     y: 0 - args.state.pacman.my,
     w: 136, # 34 - grid is made up of 4x4 x 34x37
     h: 148, # 37
+    a: 160,
     path: 'sprites/lowrez-maze.png'
   }
 end

@@ -75,13 +75,15 @@ def tick(args)
   args.lowrez.background_color = [0, 0, 0]
   draw_maze args
   draw_dots args
+  draw_score args
+  draw_lives args
   # draw_tunnel args
   draw_pacman args
 
   return if game_has_lost_focus?
 
   player_input args
-  # render_debug args
+  render_debug args
 end
 
 def draw_dots(args)
@@ -114,6 +116,36 @@ def draw_dots(args)
       end
     end
   end
+end
+
+def draw_lives(args)
+  args.state.pacman.lives.times do |index|
+    args.lowrez.primitives << {
+      x: 3 + (6 * index),
+      y: 2,
+      w: 6,
+      h: 6,
+      path: "sprites/lowrez-pac-0.png",
+      anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
+      anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
+      angle: 0
+    }
+  end
+end
+
+def draw_score(args)
+  args.lowrez.labels  << {
+    x: 32,
+    y: 63,
+    text: "#{args.state.pacman.score}",
+    size_enum: LOWREZ_FONT_TI,
+    alignment_enum: 1,
+    r: 100,
+    g: 100,
+    b: 100,
+    a: 255,
+    font: LOWREZ_FONT_PATH
+  }
 end
 
 def grid_highlight(args)

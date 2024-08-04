@@ -19,8 +19,10 @@ LOWREZ_FONT_MD_HEIGHT  = 10
 LOWREZ_FONT_SM         = -8.5
 LOWREZ_FONT_SM_HEIGHT  = 5
 
-LOWREZ_FONT_PATH       = 'fonts/lowrez.ttf'
+LOWREZ_FONT_TI         = -8
 
+# LOWREZ_FONT_PATH       = 'fonts/lowrez.ttf'
+LOWREZ_FONT_PATH       = 'fonts/tic-80-wide-font.ttf'
 
 class LowrezOutputs
   attr_accessor :width, :height

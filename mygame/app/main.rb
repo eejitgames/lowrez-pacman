@@ -1,52 +1,52 @@
 require 'app/lowrez.rb'
 
 def init(args)
-  args.state.maze = [ # this was a 28 x 31 grid
-  [ 3,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  4 ],
-  [ 6,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  6 ],
-  [ 6,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  6 ],
-  [ 6,  4,  4, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13, 14, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 15,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  1,  1,  1,  1,  1,  3,  1,  1,  1,  1,  1,  1, 21, 23,  1,  1,  1,  1,  1,  1,  3,  1,  1,  1,  1,  1, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  1, 26, 28, 28, 19,  1, 26, 28, 28, 28, 19,  1, 21, 23,  1, 26, 28, 28, 28, 19,  1, 26, 28, 28, 19,  1, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  2, 21, 10, 10, 23,  1, 21, 10, 10, 10, 23,  1, 21, 23,  1, 21, 10, 10, 10, 23,  1, 21, 10, 10, 23,  2, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  1, 22, 30, 30, 20,  1, 22, 30, 30, 30, 20,  1, 22, 20,  1, 22, 30, 30, 30, 20,  1, 22, 30, 30, 20,  1, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  3,  1,  1,  1,  1,  3,  1,  1,  3,  1,  1,  3,  1,  1,  3,  1,  1,  3,  1,  1,  3,  1,  1,  1,  1,  3, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  1, 26, 28, 28, 19,  1, 26, 19,  1, 26, 28, 28, 28, 28, 28, 28, 19,  1, 26, 19,  1, 26, 28, 28, 19,  1, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  1, 22, 30, 30, 20,  1, 21, 23,  1, 22, 30, 30, 29, 34, 30, 30, 20,  1, 21, 23,  1, 22, 30, 30, 20,  1, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  1,  1,  1,  1,  1,  3, 21, 23,  1,  1,  1,  1, 21, 23,  1,  1,  1,  1, 21, 23,  3,  1,  1,  1,  1,  1, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 17, 18, 18, 18, 18, 19,  1, 21, 35, 28, 28, 19,  0, 21, 23,  0, 26, 28, 28, 36, 23,  1, 26, 18, 18, 18, 18, 25,  4,  4,  6 ],
-  [ 6,  4,  4, 10, 10, 10, 10, 10, 16,  1, 21, 34, 30, 30, 20,  0, 22, 20,  0, 22, 30, 30, 29, 23,  1, 24, 10, 10, 10, 10, 10,  4,  4,  6 ],
-  [ 6,  4,  4, 10, 10, 10, 10, 10, 16,  1, 21, 23,  0,  0,  0,  4,  0,  0,  4,  0,  0,  0, 21, 23,  1, 24, 10, 10, 10, 10, 10,  4,  4,  6 ],
-  [ 6,  4,  4, 10, 10, 10, 10, 10, 16,  1, 21, 23,  0, 37, 18, 40, 43, 43, 41, 18, 39,  0, 21, 23,  1, 24, 10, 10, 10, 10, 10,  4,  4,  6 ],
-  [ 6,  4,  4, 12, 12, 12, 12, 12, 20,  1, 22, 20,  0, 24, 10, 10, 10, 10, 10, 10, 16,  0, 22, 20,  1, 22, 12, 12, 12, 12, 12,  4,  4,  6 ],
-  [ 6,  0,  0,  0,  0,  0,  0,  0,  6,  3,  0,  0,  4, 24, 10, 10, 10, 10, 10, 10, 16,  4,  0,  0,  3,  6,  0,  0,  0,  0,  0,  0,  0,  6 ],
-  [ 6,  4,  4, 18, 18, 18, 18, 18, 19,  1, 26, 19,  0, 24, 10, 10, 10, 10, 10, 10, 16,  0, 26, 19,  1, 26, 18, 18, 18, 18, 18,  4,  4,  6 ],
-  [ 6,  4,  4, 10, 10, 10, 10, 10, 16,  1, 21, 23,  0, 38, 12, 12, 12, 12, 12, 12, 42,  0, 21, 23,  1, 24, 10, 10, 10, 10, 10,  4,  4,  6 ],
-  [ 6,  4,  4, 10, 10, 10, 10, 10, 16,  1, 21, 23,  4,  0,  0,  0,  0,  0,  0,  0,  0,  4, 21, 23,  1, 24, 10, 10, 10, 10, 10,  4,  4,  6 ],
-  [ 6,  4,  4, 10, 10, 10, 10, 10, 16,  1, 21, 23,  0, 26, 28, 28, 28, 28, 28, 28, 19,  0, 21, 23,  1, 24, 10, 10, 10, 10, 10,  4,  4,  6 ],
-  [ 6,  4,  4, 11, 12, 12, 12, 12, 20,  1, 22, 20,  0, 22, 30, 30, 29, 34, 30, 30, 20,  0, 22, 20,  1, 22, 12, 12, 12, 12, 15,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  1,  1,  1,  1,  1,  3,  1,  1,  3,  1,  1,  3, 21, 23,  3,  1,  1,  3,  1,  1,  3,  1,  1,  1,  1,  1, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  1, 26, 28, 28, 19,  1, 26, 28, 28, 28, 19,  1, 21, 23,  1, 26, 28, 28, 28, 19,  1, 26, 28, 28, 19,  1, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  1, 22, 30, 29, 23,  1, 22, 30, 30, 30, 20,  1, 22, 20,  1, 22, 30, 30, 30, 20,  1, 21, 34, 30, 20,  1, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  2,  1,  1, 21, 23,  3,  1,  1,  3,  1,  1,  1,  0,  0,  1,  1,  1,  3,  1,  1,  3, 21, 23,  1,  1,  2, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 27, 28, 19,  1, 21, 23,  1, 26, 19,  1, 26, 28, 28, 28, 28, 28, 28, 19,  1, 26, 19,  1, 21, 23,  1, 26, 28, 33,  4,  4,  6 ],
-  [ 6,  4,  4, 31, 30, 20,  1, 22, 20,  1, 21, 23,  1, 22, 30, 30, 29, 34, 30, 30, 20,  1, 21, 23,  1, 22, 20,  1, 22, 30, 32,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  1,  1,  3,  1,  1,  3, 21, 23,  1,  1,  1,  1, 21, 23,  1,  1,  1,  1, 21, 23,  1,  1,  1,  3,  1,  1, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  1, 26, 28, 28, 28, 28, 36, 35, 28, 28, 19,  1, 21, 23,  1, 26, 28, 28, 36, 35, 28, 28, 28, 28, 19,  1, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  1, 22, 30, 30, 30, 30, 30, 30, 30, 30, 20,  1, 22, 20,  1, 22, 30, 30, 30, 30, 30, 30, 30, 30, 20,  1, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 16,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  3,  1,  1,  3,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 24,  4,  4,  6 ],
-  [ 6,  4,  4, 17, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 25,  4,  4,  6 ],
-  [ 6,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  6 ],
-  [ 6,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  6 ],
-  [ 6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6 ]
-  ].reverse
+  # 1 is an oridinary dot
+  # 2 is a power pill
+  # 3 is a junction, with a dot
+  # 4 is a junction, without a dot
+  # 5 is a corner, with a dot
+  # 6 is a corner, without a dot
 
-=begin
-  "pixel position in map mx, my:   #{32 + args.state.pacman.mx}, #{31 + args.state.pacman.my}",
-  "grid position grid_x, grid_y:   #{args.state.pacman.grid_x}, #{args.state.pacman.grid_y}",
-  "pacman coors on screen x, y:    #{args.state.pacman[:x] + args.state.offset[args.state.pacman.dir].x}, #{args.state.pacman[:y] + args.state.offset[args.state.pacman.dir].y}",
-  "maze status at grid coors:      #{args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x]}",
-=end
+  args.state.maze = [ # this was a 28 x 31 grid
+    [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9 ],
+    [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9 ],
+    [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9 ],
+    [ 9,  9,  9, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13, 14, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 15,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  5,  1,  1,  1,  1,  3,  1,  1,  1,  1,  1,  5, 21, 23,  5,  1,  1,  1,  1,  1,  3,  1,  1,  1,  1,  5, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  1, 26, 28, 28, 19,  1, 26, 28, 28, 28, 19,  1, 21, 23,  1, 26, 28, 28, 28, 19,  1, 26, 28, 28, 19,  1, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  2, 21, 10, 10, 23,  1, 21, 10, 10, 10, 23,  1, 21, 23,  1, 21, 10, 10, 10, 23,  1, 21, 10, 10, 23,  2, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  1, 22, 30, 30, 20,  1, 22, 30, 30, 30, 20,  1, 22, 20,  1, 22, 30, 30, 30, 20,  1, 22, 30, 30, 20,  1, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  3,  1,  1,  1,  1,  3,  1,  1,  3,  1,  1,  3,  1,  1,  3,  1,  1,  3,  1,  1,  3,  1,  1,  1,  1,  3, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  1, 26, 28, 28, 19,  1, 26, 19,  1, 26, 28, 28, 28, 28, 28, 28, 19,  1, 26, 19,  1, 26, 28, 28, 19,  1, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  1, 22, 30, 30, 20,  1, 21, 23,  1, 22, 30, 30, 29, 34, 30, 30, 20,  1, 21, 23,  1, 22, 30, 30, 20,  1, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  5,  1,  1,  1,  1,  3, 21, 23,  5,  1,  1,  5, 21, 23,  5,  1,  1,  5, 21, 23,  3,  1,  1,  1,  1,  5, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 17, 18, 18, 18, 18, 19,  1, 21, 35, 28, 28, 19,  0, 21, 23,  0, 26, 28, 28, 36, 23,  1, 26, 18, 18, 18, 18, 25,  9,  9,  9 ],
+    [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 34, 30, 30, 20,  0, 22, 20,  0, 22, 30, 30, 29, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
+    [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  6,  0,  0,  4,  0,  0,  4,  0,  0,  6, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
+    [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  0, 37, 18, 40, 43, 43, 41, 18, 39,  0, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
+    [ 9,  9,  9, 12, 12, 12, 12, 12, 20,  1, 22, 20,  0, 24, 10, 10, 10, 10, 10, 10, 16,  0, 22, 20,  1, 22, 12, 12, 12, 12, 12,  9,  9,  9 ],
+    [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  3,  0,  0,  4, 24, 10, 10, 10, 10, 10, 10, 16,  4,  0,  0,  3,  9,  9,  9,  9,  9,  9,  9,  9,  9 ],
+    [ 9,  9,  9, 18, 18, 18, 18, 18, 19,  1, 26, 19,  0, 24, 10, 10, 10, 10, 10, 10, 16,  0, 26, 19,  1, 26, 18, 18, 18, 18, 18,  9,  9,  9 ],
+    [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  0, 38, 12, 12, 12, 12, 12, 12, 42,  0, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
+    [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  4,  0,  0,  0,  0,  0,  0,  0,  0,  4, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
+    [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  0, 26, 28, 28, 28, 28, 28, 28, 19,  0, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
+    [ 9,  9,  9, 11, 12, 12, 12, 12, 20,  1, 22, 20,  0, 22, 30, 30, 29, 34, 30, 30, 20,  0, 22, 20,  1, 22, 12, 12, 12, 12, 15,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  5,  1,  1,  1,  1,  3,  1,  1,  3,  1,  1,  5, 21, 23,  5,  1,  1,  3,  1,  1,  3,  1,  1,  1,  1,  5, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  1, 26, 28, 28, 19,  1, 26, 28, 28, 28, 19,  1, 21, 23,  1, 26, 28, 28, 28, 19,  1, 26, 28, 28, 19,  1, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  1, 22, 30, 29, 23,  1, 22, 30, 30, 30, 20,  1, 22, 20,  1, 22, 30, 30, 30, 20,  1, 21, 34, 30, 20,  1, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  2,  1,  5, 21, 23,  3,  1,  1,  3,  1,  1,  3,  0,  0,  3,  1,  1,  3,  1,  1,  3, 21, 23,  5,  1,  2, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 27, 28, 19,  1, 21, 23,  1, 26, 19,  1, 26, 28, 28, 28, 28, 28, 28, 19,  1, 26, 19,  1, 21, 23,  1, 26, 28, 33,  9,  9,  9 ],
+    [ 9,  9,  9, 31, 30, 20,  1, 22, 20,  1, 21, 23,  1, 22, 30, 30, 29, 34, 30, 30, 20,  1, 21, 23,  1, 22, 20,  1, 22, 30, 32,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  5,  1,  3,  1,  1,  5, 21, 23,  5,  1,  1,  5, 21, 23,  5,  1,  1,  5, 21, 23,  5,  1,  1,  3,  1,  5, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  1, 26, 28, 28, 28, 28, 36, 35, 28, 28, 19,  1, 21, 23,  1, 26, 28, 28, 36, 35, 28, 28, 28, 28, 19,  1, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  1, 22, 30, 30, 30, 30, 30, 30, 30, 30, 20,  1, 22, 20,  1, 22, 30, 30, 30, 30, 30, 30, 30, 30, 20,  1, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  5,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  3,  1,  1,  3,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  5, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 17, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 25,  9,  9,  9 ],
+    [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9 ],
+    [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9 ],
+    [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9 ]
+    ].reverse
 
   args.state.pacman = {
     lives: 3,
@@ -78,7 +78,8 @@ def init(args)
     grid_y: 22,
     move_x: 0,
     move_y: 0,
-    dir: 4
+    dir: 4,
+    pen: :no
   }
 
   # to position sprite correctly
@@ -108,17 +109,101 @@ def tick(args)
 end
 
 def move_red_ghost(args)
-  # point_to_grid args, (32 + args.state.pacman.mx), (31 + args.state.pacman.my)
+  # move routine for when ghost is outside the pen only
+  return unless args.state.red_ghost.pen == :no
+
+  move_x = args.state.red_ghost.move_x
+  move_y = args.state.red_ghost.move_y
+
+  point_x = args.state.red_ghost.x
+  point_y = args.state.red_ghost.y
+
+  # check if we are in a corner or at a junction where a turn decision is to be made - both of these involve changing the dir before moving to the next step
+  # 1 is an oridinary dot
+  # 2 is a power pill
+  # 3 is a junction, with a dot
+  # 4 is a junction, without a dot
+  # 5 is a corner, with a dot
+  # 6 is a corner, without a dot
+
+
+
+
+
+
+  # try to move forward
+  case args.state.red_ghost[:dir]
+    when 1
+      if (((args.state.red_ghost.x - 1) % 4) == 0) && ((args.state.maze[(point_y / 4).floor + 1][(point_x / 4).floor]) < 9)
+        move_x = 0
+        move_y = 1
+      else
+        move_x = 0
+        move_y = 0
+      end
+      args.state.red_ghost.y += 1 if (move_y == 0) && (((args.state.red_ghost.y - 2) % 4) != 0)
+    when 2
+      if (((args.state.red_ghost.y + 2) % 4) == 0) && ((args.state.maze[(point_y / 4).floor][(point_x / 4).floor + 1]) < 9)
+        move_x = 1
+        move_y = 0
+      else
+        move_x = 0
+        move_y = 0
+      end
+        args.state.red_ghost.x += 1 if (move_x == 0) && (((args.state.red_ghost.x - 1) % 4) != 0)
+    when 3
+      if (((args.state.red_ghost.x - 1) % 4) == 0) && ((args.state.maze[(point_y / 4).floor - 1][(point_x / 4).floor]) < 9)
+        move_x = 0
+        move_y = -1
+      else
+        move_x = 0
+        move_y = 0
+      end
+        args.state.red_ghost.y -= 1 if (move_y == 0) && (((args.state.red_ghost.y - 2) % 4) != 0)
+    when 4
+      if (((args.state.red_ghost.y + 2) % 4) == 0) && ((args.state.maze[(point_y / 4).floor][(point_x / 4).floor - 1]) < 9)
+        move_x = -1
+        move_y = 0
+      else
+        move_x = 0
+        move_y = 0
+      end
+      args.state.red_ghost.x -= 1 if (move_x == 0) && (((args.state.red_ghost.x - 1) % 4) != 0)
+  end
+
+  args.state.red_ghost.mx += move_x
+  args.state.red_ghost.my += move_y
+  args.state.red_ghost.x += move_x
+  args.state.red_ghost.y += move_y
+
   point_to_grid_red_ghost args, args.state.red_ghost.x, args.state.red_ghost.y
 end
 
 def draw_dots(args)
-  args.state.maze.each_with_index do |row, row_index|
-    row.each_with_index do |value, col_index|
-      if value == 1 || value == 3
+  # rectangle_height = 29
+  # rectangle_width = 26
+  # array_height = 37 # args.state.maze.size
+  # array_width = 34 # args.state.maze[0].size
+
+  # start_row = 4 # (array_height - rectangle_height) / 2
+  # end_row = 32 # start_row + rectangle_height - 1
+  # start_col = 4 # (array_width - rectangle_width) / 2
+  # end_col = 29 # start_col + rectangle_width - 1
+
+  # (start_row..end_row).each do |row|
+  #   (start_col..end_col).each do |col|
+
+  (4..32).each do |row|
+    (4..29).each do |col|
+
+      value = args.state.maze[row][col]
+
+  #args.state.maze.each_with_index do |row, row_index|
+  #  row.each_with_index do |value, col_index|
+      if value == 1 || value == 3 || value == 5
         args.lowrez.primitives << {
-          x: (col_index * 4 - args.state.pacman.mx) + 1,
-          y: (row_index * 4 - args.state.pacman.my) + 2,
+          x: (col * 4 - args.state.pacman.mx) + 1,       # x: (col_index * 4 - args.state.pacman.mx) + 1,
+          y: (row * 4 - args.state.pacman.my) + 2, # y: (row_index * 4 - args.state.pacman.my) + 2,
           w: 1,
           h: 1,
           r: 255,
@@ -129,8 +214,8 @@ def draw_dots(args)
         }
       elsif value == 2
         args.lowrez.primitives << {
-          x: (col_index * 4 - args.state.pacman.mx),
-          y: (row_index * 4 - args.state.pacman.my) + 1,
+          x: (col * 4 - args.state.pacman.mx),     # x: (col_index * 4 - args.state.pacman.mx),
+          y: (row * 4 - args.state.pacman.my) + 1, # y: (row_index * 4 - args.state.pacman.my) + 1,
           w: 3,
           h: 3,
           r: 0xFF,
@@ -176,6 +261,7 @@ def draw_score(args)
 end
 
 def draw_ready(args)
+  return
   args.lowrez.labels  << {
     x: 34,
     y: 57,
@@ -266,28 +352,28 @@ def player_input(args)
   point_y = 31 + args.state.pacman.my
 
   if args.inputs.up
-    if (((args.state.pacman.mx - 1) % 4) == 0) && (args.state.maze[(point_y/ 4).floor + 1][(point_x / 4).floor] < 2)
+    if (((args.state.pacman.mx - 1) % 4) == 0) && (args.state.maze[(point_y/ 4).floor + 1][(point_x / 4).floor] < 9)
       args.state.pacman[:dir] = 1
       move_y = 1
       move_x = 0
       args.state.pacman.anim = :yes
     end
   elsif args.inputs.right
-    if (((args.state.pacman.my + 1) % 4) == 0) && (args.state.maze[(point_y / 4).floor][(point_x / 4).floor + 1] < 2)
+    if (((args.state.pacman.my + 1) % 4) == 0) && (args.state.maze[(point_y / 4).floor][(point_x / 4).floor + 1] < 9)
       args.state.pacman[:dir] = 2
       move_x = 1
       move_y = 0
       args.state.pacman.anim = :yes
     end
   elsif args.inputs.down
-    if (((args.state.pacman.mx - 1) % 4) == 0) && (args.state.maze[(point_y/ 4).floor - 1][(point_x / 4).floor] < 2)
+    if (((args.state.pacman.mx - 1) % 4) == 0) && (args.state.maze[(point_y/ 4).floor - 1][(point_x / 4).floor] < 9)
       args.state.pacman[:dir] = 3
       move_y = -1
       move_x = 0
       args.state.pacman.anim = :yes
     end
   elsif args.inputs.left
-    if (((args.state.pacman.my + 1) % 4) == 0) && (args.state.maze[(point_y / 4).floor][(point_x / 4).floor - 1] < 2)
+    if (((args.state.pacman.my + 1) % 4) == 0) && (args.state.maze[(point_y / 4).floor][(point_x / 4).floor - 1] < 9)
       args.state.pacman[:dir] = 4
       move_x = -1
       move_y = 0
@@ -307,14 +393,24 @@ def player_input(args)
       temp = point_to_grid args, (32 + args.state.pacman.mx + move_x - 1), (31 + args.state.pacman.my + move_y)
   end
 
-  if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] > 4
+  if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] > 8
     args.state.pacman.anim = :no
     move_x = 0
     move_y = 0
   end
 
-  if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] == 1 || args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] == 3
+  if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] == 1
     args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
+    args.state.pacman.score += 10
+  end
+
+  if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] == 3
+    args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 4
+    args.state.pacman.score += 10
+  end
+
+  if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] == 5
+    args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
     args.state.pacman.score += 10
   end
 
@@ -339,8 +435,8 @@ end
 def draw_red_ghost(args)
   sprite_path  = "sprites/red-ghost.png"
   args.lowrez.primitives << {
-    x: (0 - args.state.pacman.mx + 1) + 67,
-    y: (0 - args.state.pacman.my) + 90,
+    x: (0 - args.state.pacman.mx + 1) + args.state.red_ghost.x,
+    y: (0 - args.state.pacman.my) + args.state.red_ghost.y,
     w: 8,
     h: 8,
     path: sprite_path,
@@ -412,8 +508,8 @@ def render_debug(args)
   grid_highlight_red_ghost args
   # this is the point to determine which part of the grid red ghost is in
   args.lowrez.primitives << {
-    x: (0 - args.state.pacman.mx) + 67,
-    y: (0 - args.state.pacman.my) + 90,
+    x: (0 - args.state.pacman.mx) + args.state.red_ghost.x,
+    y: (0 - args.state.pacman.my) + args.state.red_ghost.y,
     w: 1,
     h: 1,
     r: 200,
@@ -482,7 +578,8 @@ def render_debug(args)
     # "red ghost map pos mx, my:       #{32 + args.state.red_ghost.mx}, #{31 + args.state.red_ghost.my}",
     "red ghost grid grid_x, grid_y:  #{args.state.red_ghost.grid_x}, #{args.state.red_ghost.grid_y}",
     # "red ghost screen coors x, y:    #{args.state.red_ghost[:x]}, #{args.state.red_ghost[:y]}",
-    # "args.state.map_origin_x, oy:    #{args.state.map_origin_x}, #{args.state.map_origin_y}"
+    # "args.state.map_origin_x, oy:    #{args.state.map_origin_x}, #{args.state.map_origin_y}",
+    "red ghost is hovering over:           #{args.state.maze[args.state.red_ghost.grid_y][args.state.red_ghost.grid_x]}"
   ]
 
   args.outputs.debug << args.state

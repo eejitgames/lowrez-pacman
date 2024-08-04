@@ -55,6 +55,8 @@ def init(args)
     dir: 0, # 1 up, 2 right, 3 down, 4 left (0 for stationary until a key is pressed)
     move_x: 0,
     move_y: 0,
+    anim: :no,
+    frame: 0,
     speed: 4
   }
 
@@ -83,7 +85,7 @@ def tick(args)
   return if game_has_lost_focus?
 
   player_input args
-  render_debug args
+  # render_debug args
 end
 
 def draw_dots(args)
@@ -195,25 +197,28 @@ def player_input(args)
       args.state.pacman[:dir] = 1
       move_y = 1
       move_x = 0
+      args.state.pacman.anim = :yes
     end
   elsif args.inputs.right
     if (((args.state.pacman.my + 1) % 4) == 0) && (args.state.maze[(point_y / 4).floor][(point_x / 4).floor + 1] < 3)
       args.state.pacman[:dir] = 2
       move_x = 1
       move_y = 0
-      safe_y = args.state.pacman.my
+      args.state.pacman.anim = :yes
     end
   elsif args.inputs.down
     if (((args.state.pacman.mx - 1) % 4) == 0) && (args.state.maze[(point_y/ 4).floor - 1][(point_x / 4).floor] < 3)
       args.state.pacman[:dir] = 3
       move_y = -1
       move_x = 0
+      args.state.pacman.anim = :yes
     end
   elsif args.inputs.left
     if (((args.state.pacman.my + 1) % 4) == 0) && (args.state.maze[(point_y / 4).floor][(point_x / 4).floor - 1] < 3)
       args.state.pacman[:dir] = 4
       move_x = -1
       move_y = 0
+      args.state.pacman.anim = :yes
     end
   end
 
@@ -230,6 +235,7 @@ def player_input(args)
   end
 
   if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] > 2
+    args.state.pacman.anim = :no
     move_x = 0
     move_y = 0
   end
@@ -253,10 +259,17 @@ def player_input(args)
 end
 
 def draw_pacman(args)
-  start_animation_on_tick = 10
-  sprite_index = start_animation_on_tick.frame_index count: 3,     # how many sprites?
-                                                     hold_for: 12, # how long to hold each sprite?
-                                                     repeat: true  # should it repeat?
+  start_animation_on_tick = 1
+
+  if args.state.pacman.anim == :yes
+    sprite_index = start_animation_on_tick.frame_index count: 3,     # how many sprites?
+                                                       hold_for: 12, # how long to hold each sprite?
+                                                       repeat: true  # should it repeat?
+    args.state.pacman.frame = sprite_index
+  else
+    sprite_index = args.state.pacman.frame
+  end
+
   if sprite_index
     sprite_path  = "sprites/lowrez-pac-#{sprite_index}.png"
     args.lowrez.primitives << {

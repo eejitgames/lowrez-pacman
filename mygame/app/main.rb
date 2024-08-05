@@ -65,7 +65,8 @@ def init(args)
     move_y: 0,
     anim: :no,
     frame: 0,
-    speed: 4
+    powered_up: 0,
+    speed: 2
   }
 
   args.state.red_ghost = {
@@ -84,6 +85,7 @@ def init(args)
     dir: 4,
     pen: :no,
     mode: :chase, # mode either chase or scatter
+    speed: 2,
     skip_frame: :true
   }
 
@@ -107,9 +109,18 @@ def tick(args)
   draw_pacman args
   # render_debug args
   return if game_has_lost_focus?
-  player_input args if Kernel.tick_count.zmod? 2
+  player_input args if Kernel.tick_count.zmod? args.state.pacman.speed
+  ghost_mode args
   return if args.state.pacman.dir == 0 # pacman has not moved yet, the game has not started
-  move_red_ghost args if Kernel.tick_count.zmod? 2
+  move_red_ghost args if Kernel.tick_count.zmod? args.state.red_ghost.speed
+end
+
+def ghost_mode(args)
+  # Use Numeric#elapsed_time to determine how long it's been
+  if args.state.pacman.powered_up.elapsed_time > 60 * 9 # 9 seconds
+    args.state.red_ghost.speed = 2
+    args.state.red_ghost.mode = :chase
+  end
 end
 
 def distance(x1, y1, x2, y2)
@@ -284,28 +295,28 @@ def move_red_ghost(args)
           # args.state.red_ghost.dir = 3 if (allowed_down == :yes && args.state.red_ghost.mode == :scatter)
           args.state.red_ghost.dir = 4 if allowed_left == :yes
           args.state.red_ghost.dir = 1 if allowed_up == :yes
-          points_to_check.delete(:down) unless args.state.red_ghost.mode == :scatter
+          points_to_check.delete(:down) # unless args.state.red_ghost.mode == :scatter
         when 2 # right
           # if going right, check up, down, and right
           args.state.red_ghost.dir = 2 if allowed_right == :yes
           args.state.red_ghost.dir = 3 if allowed_down == :yes
           # args.state.red_ghost.dir = 4 if (allowed_left == :yes && args.state.red_ghost.mode == :scatter)
           args.state.red_ghost.dir = 1 if allowed_up == :yes
-          points_to_check.delete(:left) unless args.state.red_ghost.mode == :scatter
+          points_to_check.delete(:left) # unless args.state.red_ghost.mode == :scatter
         when 3 # down
           # if going down, check left, right, and down
           args.state.red_ghost.dir = 2 if allowed_right == :yes
           args.state.red_ghost.dir = 3 if allowed_down == :yes
           args.state.red_ghost.dir = 4 if allowed_left == :yes
           # args.state.red_ghost.dir = 1 if (allowed_up == :yes && args.state.red_ghost.mode == :scatter)
-          points_to_check.delete(:up) unless args.state.red_ghost.mode == :scatter
+          points_to_check.delete(:up) # unless args.state.red_ghost.mode == :scatter
         when 4 # left
           # if going left, check up, down and left
           # args.state.red_ghost.dir = 2 if (allowed_right == :yes && args.state.red_ghost.mode == :scatter)
           args.state.red_ghost.dir = 3 if allowed_down == :yes
           args.state.red_ghost.dir = 4 if allowed_left == :yes
           args.state.red_ghost.dir = 1 if allowed_up == :yes
-          points_to_check.delete(:right) unless args.state.red_ghost.mode == :scatter
+          points_to_check.delete(:right) # unless args.state.red_ghost.mode == :scatter
       end
 
       # putz "points_to_check: #{points_to_check}"
@@ -597,9 +608,15 @@ def player_input(args)
     when 2
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
       args.state.pacman.score += 50
+      args.state.pacman.powered_up = Kernel.tick_count
+      args.state.red_ghost.speed = 4
+      args.state.red_ghost.mode = :scatter
     when 7
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
       args.state.pacman.score += 50
+      args.state.pacman.powered_up = Kernel.tick_count
+      args.state.red_ghost.speed = 4
+      args.state.red_ghost.mode = :scatter
   end
 
   args.state.pacman.move_x = move_x
@@ -617,6 +634,7 @@ end
 
 def draw_red_ghost(args)
   sprite_path  = "sprites/red-ghost-#{args.state.red_ghost.dir}.png"
+  sprite_path  = "sprites/ghost-flee.png" if args.state.red_ghost.mode == :scatter
   args.lowrez.primitives << {
     x: (0 - args.state.pacman.mx + 1) + args.state.red_ghost.x,
     y: (0 - args.state.pacman.my) + args.state.red_ghost.y,
@@ -759,17 +777,17 @@ def render_debug(args)
     # "pacman coors on screen x, y:    #{args.state.pacman[:x] + args.state.offset[args.state.pacman.dir].x}, #{args.state.pacman[:y] + args.state.offset[args.state.pacman.dir].y}",
     # "maze status at grid coors:      #{args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x]}",
     # "red ghost map pos mx, my:       #{32 + args.state.red_ghost.mx}, #{31 + args.state.red_ghost.my}",
-    "red ghost grid grid_x, grid_y:  #{args.state.red_ghost.grid_x}, #{args.state.red_ghost.grid_y}",
-    "red ghost screen coors x, y:    #{args.state.red_ghost[:x]}, #{args.state.red_ghost[:y]}",
+    # "red ghost grid grid_x, grid_y:  #{args.state.red_ghost.grid_x}, #{args.state.red_ghost.grid_y}",
+    # "red ghost screen coors x, y:    #{args.state.red_ghost[:x]}, #{args.state.red_ghost[:y]}",
     # "args.state.map_origin_x, oy:    #{args.state.map_origin_x}, #{args.state.map_origin_y}",
-    "red ghost is hovering over:     #{args.state.maze[args.state.red_ghost.grid_y][args.state.red_ghost.grid_x]}",
-    "red ghost in a maze corner:     #{args.state.red_ghost_in_a_corner}",
-    "red ghost in a maze junction:   #{args.state.red_ghost_in_a_junction}",
-    "red ghost is allowed up:        #{args.state.red_ghost.allowed_up}",
-    "red ghost is allowed right:     #{args.state.red_ghost.allowed_right}",
-    "red ghost is allowed down:      #{args.state.red_ghost.allowed_down}",
-    "red ghost is allowed left:      #{args.state.red_ghost.allowed_left}",
-    "red ghost is direction:         #{args.state.red_ghost.dir}"
+    # "red ghost is hovering over:     #{args.state.maze[args.state.red_ghost.grid_y][args.state.red_ghost.grid_x]}",
+    # "red ghost in a maze corner:     #{args.state.red_ghost_in_a_corner}",
+    # "red ghost in a maze junction:   #{args.state.red_ghost_in_a_junction}",
+    # "red ghost is allowed up:        #{args.state.red_ghost.allowed_up}",
+    # "red ghost is allowed right:     #{args.state.red_ghost.allowed_right}",
+    # "red ghost is allowed down:      #{args.state.red_ghost.allowed_down}",
+    # "red ghost is allowed left:      #{args.state.red_ghost.allowed_left}",
+    # "red ghost is direction:         #{args.state.red_ghost.dir}"
   ]
 
   args.outputs.debug << args.state

@@ -83,7 +83,8 @@ def init(args)
     move_y: 0,
     dir: 4,
     pen: :no,
-    mode: :chase # mode either chase or scatter
+    mode: :chase, # mode either chase or scatter
+    skip_frame: :true
   }
 
   # to position sprite correctly
@@ -108,7 +109,7 @@ def tick(args)
   return if game_has_lost_focus?
   player_input args if Kernel.tick_count.zmod? 2
   return if args.state.pacman.dir == 0 # pacman has not moved yet, the game has not started
-  move_red_ghost args if Kernel.tick_count.zmod? 3 # unless Kernel.tick_count.zmod? 120
+  move_red_ghost args if Kernel.tick_count.zmod? 2
 end
 
 def distance(x1, y1, x2, y2)
@@ -118,6 +119,11 @@ end
 def move_red_ghost(args)
   # move routine for when ghost is outside the pen only
   return unless args.state.red_ghost.pen == :no
+
+  if args.state.red_ghost.skip_frame == :true
+    args.state.red_ghost.skip_frame = :false
+    return
+  end
 
   #set target square to where pacman is
   args.state.red_ghost.target_x = args.state.pacman.grid_x
@@ -189,6 +195,12 @@ def move_red_ghost(args)
 
   if (red_ghost_over == 5 || red_ghost_over == 6 || red_ghost_over == 7) && (((args.state.red_ghost.x - 1 ) % 4) == 0) && (((args.state.red_ghost.y - 2 ) % 4) == 0)
     args.state.red_ghost_in_a_corner = :yes
+  end
+
+  # stall ghost slightly in a corner, helps a tiny bit ;)
+  if args.state.red_ghost_in_a_corner == :yes && args.state.red.ghost.skip_frame == :true
+    args.state.red.ghost.skip_frame = :false
+    return
   end
 
   if (red_ghost_over == 3 || red_ghost_over == 4) && (((args.state.red_ghost.x - 1 ) % 4) == 0) && (((args.state.red_ghost.y - 2 ) % 4) == 0)
@@ -346,6 +358,7 @@ def move_red_ghost(args)
         end
       end
     end
+    args.state.red.ghost.skip_frame = :true
   end
   args.state.red_ghost.allowed_up = allowed_up
   args.state.red_ghost.allowed_right = allowed_right

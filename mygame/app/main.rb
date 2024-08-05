@@ -7,6 +7,7 @@ def init(args)
   # 4 is a junction, without a dot
   # 5 is a corner, with a dot
   # 6 is a corner, without a dot
+  # 7 is a corner, with a power pill
 
   args.state.maze = [ # this was a 28 x 31 grid
     [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9 ],
@@ -35,7 +36,7 @@ def init(args)
     [ 9,  9,  9, 16,  5,  1,  1,  1,  1,  3,  1,  1,  3,  1,  1,  5, 21, 23,  5,  1,  1,  3,  1,  1,  3,  1,  1,  1,  1,  5, 24,  9,  9,  9 ],
     [ 9,  9,  9, 16,  1, 26, 28, 28, 19,  1, 26, 28, 28, 28, 19,  1, 21, 23,  1, 26, 28, 28, 28, 19,  1, 26, 28, 28, 19,  1, 24,  9,  9,  9 ],
     [ 9,  9,  9, 16,  1, 22, 30, 29, 23,  1, 22, 30, 30, 30, 20,  1, 22, 20,  1, 22, 30, 30, 30, 20,  1, 21, 34, 30, 20,  1, 24,  9,  9,  9 ],
-    [ 9,  9,  9, 16,  2,  1,  5, 21, 23,  3,  1,  1,  3,  1,  1,  3,  0,  0,  3,  1,  1,  3,  1,  1,  3, 21, 23,  5,  1,  2, 24,  9,  9,  9 ],
+    [ 9,  9,  9, 16,  7,  1,  5, 21, 23,  3,  1,  1,  3,  1,  1,  3,  0,  0,  3,  1,  1,  3,  1,  1,  3, 21, 23,  5,  1,  7, 24,  9,  9,  9 ],
     [ 9,  9,  9, 27, 28, 19,  1, 21, 23,  1, 26, 19,  1, 26, 28, 28, 28, 28, 28, 28, 19,  1, 26, 19,  1, 21, 23,  1, 26, 28, 33,  9,  9,  9 ],
     [ 9,  9,  9, 31, 30, 20,  1, 22, 20,  1, 21, 23,  1, 22, 30, 30, 29, 34, 30, 30, 20,  1, 21, 23,  1, 22, 20,  1, 22, 30, 32,  9,  9,  9 ],
     [ 9,  9,  9, 16,  5,  1,  3,  1,  1,  5, 21, 23,  5,  1,  1,  5, 21, 23,  5,  1,  1,  5, 21, 23,  5,  1,  1,  3,  1,  5, 24,  9,  9,  9 ],
@@ -72,8 +73,10 @@ def init(args)
     y: 90,
     mx: 35,
     my: 79,
-    hx: 16, # grid coors, home corner when scatter mode
-    hy: 10,
+    home_x: 16, # grid coors, home corner when scatter mode
+    home_y: 10,
+    target_x: 16,
+    target_y: 10,
     grid_x: 16,
     grid_y: 22,
     move_x: 0,
@@ -104,8 +107,8 @@ def tick(args)
   return if game_has_lost_focus?
   player_input args
   return if args.state.pacman.dir == 0 # pacman has not moved yet, the game has not started
-  move_red_ghost args if Kernel.tick_count.zmod? 60
-  grid_highlight_red_ghost args
+  move_red_ghost args if Kernel.tick_count.zmod? 3
+  # grid_highlight_red_ghost args
 end
 
 def move_red_ghost(args)
@@ -114,22 +117,8 @@ def move_red_ghost(args)
 
   move_x = args.state.red_ghost.move_x
   move_y = args.state.red_ghost.move_y
-
   point_x = args.state.red_ghost.x
   point_y = args.state.red_ghost.y
-
-  # check if we are in a corner or at a junction where a turn decision is to be made - both of these involve changing the dir before moving to the next step
-  # 1 is an oridinary dot
-  # 2 is a power pill
-  # 3 is a junction, with a dot
-  # 4 is a junction, without a dot
-  # 5 is a corner, with a dot
-  # 6 is a corner, without a dot
-
-
-
-
-
 
   # try to move forward
   case args.state.red_ghost[:dir]
@@ -177,6 +166,109 @@ def move_red_ghost(args)
   args.state.red_ghost.y += move_y
 
   point_to_grid_red_ghost args, args.state.red_ghost.x, args.state.red_ghost.y
+
+  # Ok we have moved, check if we are in a corner or at a junction where a turn decision/change of direction happens
+  # 1 is an oridinary dot
+  # 2 is a power pill
+  # 3 is a junction, with a dot
+  # 4 is a junction, without a dot
+  # 5 is a corner, with a dot
+  # 6 is a corner, without a dot
+
+  args.state.red_ghost_in_a_corner = :no
+  args.state.red_ghost_in_a_junction = :no
+  red_ghost_over = args.state.maze[args.state.red_ghost.grid_y][args.state.red_ghost.grid_x]
+
+  if (red_ghost_over == 5 || red_ghost_over == 6 || red_ghost_over == 7) && (((args.state.red_ghost.x - 1 ) % 4) == 0) && (((args.state.red_ghost.y - 2 ) % 4) == 0)
+    args.state.red_ghost_in_a_corner = :yes
+  end
+
+  if (red_ghost_over == 3 || red_ghost_over == 4) && (((args.state.red_ghost.x - 1 ) % 4) == 0) && (((args.state.red_ghost.y - 2 ) % 4) == 0)
+    args.state.red_ghost_in_a_junction = :yes
+  end
+
+  allowed_up = :no
+  allowed_right = :no
+  allowed_down = :no
+  allowed_left = :no
+  if args.state.red_ghost_in_a_corner == :yes || args.state.red_ghost_in_a_junction == :yes
+    # check which directions are available including backwards (only allowed when in scatter mode)
+    # 1 up, 2 right, 3 down, 4 left
+    allowed_up = :no
+    allowed_right = :no
+    allowed_down = :no
+    allowed_left = :no
+    # check the grid north, south, east, and west of current position
+    allowed_up = :yes if args.state.maze[args.state.red_ghost.grid_y + 1][args.state.red_ghost.grid_x] < 9
+    allowed_right = :yes if args.state.maze[args.state.red_ghost.grid_y][args.state.red_ghost.grid_x + 1] < 9
+    allowed_down = :yes if args.state.maze[args.state.red_ghost.grid_y - 1][args.state.red_ghost.grid_x] < 9
+    allowed_left = :yes if args.state.maze[args.state.red_ghost.grid_y][args.state.red_ghost.grid_x - 1] < 9
+
+    # for a corner loop over the directions skipping the current dir and it's opposite
+    if args.state.red_ghost_in_a_corner == :yes
+      case args.state.red_ghost.dir
+        when 1
+        # if going up, check left and right
+          args.state.red_ghost.dir = 2 if allowed_right == :yes
+          args.state.red_ghost.dir = 4 if allowed_left == :yes
+        when 2
+          # if going right, check up and down
+          args.state.red_ghost.dir = 1 if allowed_up == :yes
+          args.state.red_ghost.dir = 3 if allowed_down == :yes
+        when 3
+          # if going down, check left and right
+          args.state.red_ghost.dir = 2 if allowed_right == :yes
+          args.state.red_ghost.dir = 4 if allowed_left == :yes
+        when 4
+          # if going left, check up and down
+          args.state.red_ghost.dir = 1 if allowed_up == :yes
+          args.state.red_ghost.dir = 3 if allowed_down == :yes
+      end
+    end
+
+    # for a junction loop over the directions skipping the opposite
+    if args.state.red_ghost_in_a_junction == :yes
+      case args.state.red_ghost.dir
+        when 1
+        # if going up, check left, right and up
+          args.state.red_ghost.dir = 2 if allowed_right == :yes
+          args.state.red_ghost.dir = 4 if allowed_left == :yes
+          args.state.red_ghost.dir = 1 if allowed_up == :yes
+        when 2
+          # if going right, check up, down, and right
+          args.state.red_ghost.dir = 1 if allowed_up == :yes
+          args.state.red_ghost.dir = 3 if allowed_down == :yes
+          args.state.red_ghost.dir = 2 if allowed_right == :yes
+        when 3
+          # if going down, check left, right, and down
+          args.state.red_ghost.dir = 2 if allowed_right == :yes
+          args.state.red_ghost.dir = 4 if allowed_left == :yes
+          args.state.red_ghost.dir = 3 if allowed_down == :yes
+        when 4
+          # if going left, check up, down and left
+          args.state.red_ghost.dir = 1 if allowed_up == :yes
+          args.state.red_ghost.dir = 3 if allowed_down == :yes
+          args.state.red_ghost.dir = 4 if allowed_left == :yes
+      end
+    end
+  end
+  args.state.red_ghost.allowed_up = allowed_up
+  args.state.red_ghost.allowed_right = allowed_right
+  args.state.red_ghost.allowed_down = allowed_down
+  args.state.red_ghost.allowed_left = allowed_left
+
+
+
+
+
+
+
+
+
+
+
+
+
 end
 
 def draw_dots(args)
@@ -212,7 +304,7 @@ def draw_dots(args)
           a: 160,
           path: :pixel
         }
-      elsif value == 2
+      elsif value == 2 || value == 7
         args.lowrez.primitives << {
           x: (col * 4 - args.state.pacman.mx),     # x: (col_index * 4 - args.state.pacman.mx),
           y: (row * 4 - args.state.pacman.my) + 1, # y: (row_index * 4 - args.state.pacman.my) + 1,
@@ -399,6 +491,25 @@ def player_input(args)
     move_y = 0
   end
 
+  case args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x]
+    when 1
+      args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
+      args.state.pacman.score += 10
+    when 3
+      args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 4
+      args.state.pacman.score += 10
+    when 5
+      args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
+      args.state.pacman.score += 10
+    when 2
+      args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
+      args.state.pacman.score += 50
+    when 7
+      args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
+      args.state.pacman.score += 50
+  end
+
+=begin
   if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] == 1
     args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
     args.state.pacman.score += 10
@@ -418,6 +529,12 @@ def player_input(args)
     args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
     args.state.pacman.score += 50
   end
+
+  if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] == 7
+    args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
+    args.state.pacman.score += 50
+  end
+=end
 
   args.state.pacman.move_x = move_x
   args.state.pacman.move_y = move_y
@@ -577,9 +694,16 @@ def render_debug(args)
     # "maze status at grid coors:      #{args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x]}",
     # "red ghost map pos mx, my:       #{32 + args.state.red_ghost.mx}, #{31 + args.state.red_ghost.my}",
     "red ghost grid grid_x, grid_y:  #{args.state.red_ghost.grid_x}, #{args.state.red_ghost.grid_y}",
-    # "red ghost screen coors x, y:    #{args.state.red_ghost[:x]}, #{args.state.red_ghost[:y]}",
+    "red ghost screen coors x, y:    #{args.state.red_ghost[:x]}, #{args.state.red_ghost[:y]}",
     # "args.state.map_origin_x, oy:    #{args.state.map_origin_x}, #{args.state.map_origin_y}",
-    "red ghost is hovering over:           #{args.state.maze[args.state.red_ghost.grid_y][args.state.red_ghost.grid_x]}"
+    "red ghost is hovering over:     #{args.state.maze[args.state.red_ghost.grid_y][args.state.red_ghost.grid_x]}",
+    "red ghost in a maze corner:     #{args.state.red_ghost_in_a_corner}",
+    "red ghost in a maze junction:   #{args.state.red_ghost_in_a_junction}",
+    "red ghost is allowed up:        #{args.state.red_ghost.allowed_up}",
+    "red ghost is allowed right:     #{args.state.red_ghost.allowed_right}",
+    "red ghost is allowed down:      #{args.state.red_ghost.allowed_down}",
+    "red ghost is allowed left:      #{args.state.red_ghost.allowed_left}",
+    "red ghost is direction:         #{args.state.red_ghost.dir}"
   ]
 
   args.outputs.debug << args.state

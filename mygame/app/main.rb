@@ -104,11 +104,11 @@ def tick(args)
   draw_red_ghost args
   draw_lives args
   draw_pacman args
-  render_debug args
+  # render_debug args
   return if game_has_lost_focus?
-  player_input args
+  player_input args if Kernel.tick_count.zmod? 2
   return if args.state.pacman.dir == 0 # pacman has not moved yet, the game has not started
-  move_red_ghost args if Kernel.tick_count.zmod? 3
+  move_red_ghost args if Kernel.tick_count.zmod? 3 # unless Kernel.tick_count.zmod? 120
 end
 
 def distance(x1, y1, x2, y2)
@@ -118,6 +118,10 @@ end
 def move_red_ghost(args)
   # move routine for when ghost is outside the pen only
   return unless args.state.red_ghost.pen == :no
+
+  #set target square to where pacman is
+  args.state.red_ghost.target_x = args.state.pacman.grid_x
+  args.state.red_ghost.target_y = args.state.pacman.grid_y
 
   move_x = args.state.red_ghost.move_x
   move_y = args.state.red_ghost.move_y
@@ -292,9 +296,7 @@ def move_red_ghost(args)
           points_to_check.delete(:right) unless args.state.red_ghost.mode == :scatter
       end
 
-      puts "points_to_check: #{points_to_check}"
-
-      # =begin
+      # putz "points_to_check: #{points_to_check}"
       # check if we have a shortest distance to target without a tie
       distances = {}
 
@@ -321,29 +323,28 @@ def move_red_ghost(args)
 
       # Print results based on the number of closest points
       if closest_points.size > 1
-        puts "There is a tie between the closest points:"
-        puts "Using default dir from above"
+        # putz "There is a tie between the closest points:"
+        # putz "Using default dir from above"
       else
         closest_point = closest_points.first[0]
         coord = points_to_check[closest_point]
-        puts "The closest point to the target (#{target_x}, #{target_y}) is #{closest_point}: (#{coord[0]}, #{coord[1]})"
+        # putz "The closest point to the target (#{target_x}, #{target_y}) is #{closest_point}: (#{coord[0]}, #{coord[1]})"
         # 1 up, 2 right, 3 down, 4 left
         case closest_point
           when :up
-            puts"going up"
+            # putz "going up"
             args.state.red_ghost.dir = 1
           when :right
-            puts "going right"
+            # putz "going right"
             args.state.red_ghost.dir = 2
           when :down
-            puts "going down"
+            # putz "going down"
             args.state.red_ghost.dir = 3
           when :left
-            puts "going left"
+            # putz "going left"
             args.state.red_ghost.dir = 4
         end
       end
-      # =end
     end
   end
   args.state.red_ghost.allowed_up = allowed_up
@@ -516,8 +517,6 @@ end
 
 # 1 up, 2 right, 3 down, 4 left (0 for stationary until a key is pressed)
 def player_input(args)
-  return unless args.state.tick_count.zmod? 2
-
   move_x = args.state.pacman.move_x
   move_y = args.state.pacman.move_y
 
@@ -590,33 +589,6 @@ def player_input(args)
       args.state.pacman.score += 50
   end
 
-=begin
-  if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] == 1
-    args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
-    args.state.pacman.score += 10
-  end
-
-  if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] == 3
-    args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 4
-    args.state.pacman.score += 10
-  end
-
-  if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] == 5
-    args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
-    args.state.pacman.score += 10
-  end
-
-  if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] == 2
-    args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
-    args.state.pacman.score += 50
-  end
-
-  if args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] == 7
-    args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
-    args.state.pacman.score += 50
-  end
-=end
-
   args.state.pacman.move_x = move_x
   args.state.pacman.move_y = move_y
   args.state.pacman.mx += move_x
@@ -631,7 +603,7 @@ def player_input(args)
 end
 
 def draw_red_ghost(args)
-  sprite_path  = "sprites/red-ghost.png"
+  sprite_path  = "sprites/red-ghost-#{args.state.red_ghost.dir}.png"
   args.lowrez.primitives << {
     x: (0 - args.state.pacman.mx + 1) + args.state.red_ghost.x,
     y: (0 - args.state.pacman.my) + args.state.red_ghost.y,

@@ -73,8 +73,8 @@ def init(args)
     y: 90,
     mx: 35,
     my: 79,
-    home_x: 16, # grid coors, home corner when scatter mode
-    home_y: 10,
+    home_x: 28, # grid coors, home corner when scatter mode
+    home_y: 37,
     target_x: 16,
     target_y: 10,
     grid_x: 16,
@@ -82,7 +82,8 @@ def init(args)
     move_x: 0,
     move_y: 0,
     dir: 4,
-    pen: :no
+    pen: :no,
+    mode: :chase # mode either chase or scatter
   }
 
   # to position sprite correctly
@@ -100,15 +101,18 @@ def tick(args)
   draw_maze args
   draw_dots args
   draw_score args
-  draw_lives args
   draw_red_ghost args
+  draw_lives args
   draw_pacman args
   render_debug args
   return if game_has_lost_focus?
   player_input args
   return if args.state.pacman.dir == 0 # pacman has not moved yet, the game has not started
   move_red_ghost args if Kernel.tick_count.zmod? 3
-  # grid_highlight_red_ghost args
+end
+
+def distance(x1, y1, x2, y2)
+  (x2 - x1)**2 + (y2 - y1)**2
 end
 
 def move_red_ghost(args)
@@ -192,17 +196,44 @@ def move_red_ghost(args)
   allowed_down = :no
   allowed_left = :no
   if args.state.red_ghost_in_a_corner == :yes || args.state.red_ghost_in_a_junction == :yes
+    # we are at a corner or junction, capture the grid coordinates of the four possible options
+    grid_up_x    = args.state.red_ghost.grid_x
+    grid_up_y    = args.state.red_ghost.grid_y + 1
+
+    grid_right_x = args.state.red_ghost.grid_x + 1
+    grid_right_y = args.state.red_ghost.grid_y
+
+    grid_down_x  = args.state.red_ghost.grid_x
+    grid_down_y  = args.state.red_ghost.grid_y - 1
+
+    grid_left_x  = args.state.red_ghost.grid_x - 1
+    grid_left_y  = args.state.red_ghost.grid_y
+
     # check which directions are available including backwards (only allowed when in scatter mode)
     # 1 up, 2 right, 3 down, 4 left
     allowed_up = :no
     allowed_right = :no
     allowed_down = :no
     allowed_left = :no
-    # check the grid north, south, east, and west of current position
-    allowed_up = :yes if args.state.maze[args.state.red_ghost.grid_y + 1][args.state.red_ghost.grid_x] < 9
-    allowed_right = :yes if args.state.maze[args.state.red_ghost.grid_y][args.state.red_ghost.grid_x + 1] < 9
-    allowed_down = :yes if args.state.maze[args.state.red_ghost.grid_y - 1][args.state.red_ghost.grid_x] < 9
-    allowed_left = :yes if args.state.maze[args.state.red_ghost.grid_y][args.state.red_ghost.grid_x - 1] < 9
+    # check the grid north, south, east, and west of current position, also update points to check
+    points_to_check = {}
+    if args.state.maze[grid_up_y][grid_up_x] < 9
+      allowed_up    = :yes
+      points_to_check[:up] = [grid_up_x, grid_up_y]
+    end
+    if args.state.maze[grid_right_y][grid_right_x] < 9
+      allowed_right = :yes
+      points_to_check[:right] = [grid_right_x, grid_right_y]
+    end
+    if args.state.maze[grid_down_y][grid_down_x] < 9
+      allowed_down  = :yes
+      points_to_check[:down] = [grid_down_x, grid_down_y]
+    end
+    if args.state.maze[grid_left_y][grid_left_x] < 9
+      allowed_left  = :yes
+      points_to_check[:left] = [grid_left_x, grid_left_y]
+    end
+
 
     # for a corner loop over the directions skipping the current dir and it's opposite
     if args.state.red_ghost_in_a_corner == :yes
@@ -226,49 +257,99 @@ def move_red_ghost(args)
       end
     end
 
-    # for a junction loop over the directions skipping the opposite
+    # for a junction loop over the directions optionally skipping the opposite
+    # To break a tie, the ghost prefers directions in this order: up, left, down, right
     if args.state.red_ghost_in_a_junction == :yes
+    # this sets a default in the case there is a tie in the distance
       case args.state.red_ghost.dir
-        when 1
+        when 1 # up
         # if going up, check left, right and up
           args.state.red_ghost.dir = 2 if allowed_right == :yes
+          # args.state.red_ghost.dir = 3 if (allowed_down == :yes && args.state.red_ghost.mode == :scatter)
           args.state.red_ghost.dir = 4 if allowed_left == :yes
           args.state.red_ghost.dir = 1 if allowed_up == :yes
-        when 2
+          points_to_check.delete(:down) unless args.state.red_ghost.mode == :scatter
+        when 2 # right
           # if going right, check up, down, and right
-          args.state.red_ghost.dir = 1 if allowed_up == :yes
-          args.state.red_ghost.dir = 3 if allowed_down == :yes
           args.state.red_ghost.dir = 2 if allowed_right == :yes
-        when 3
+          args.state.red_ghost.dir = 3 if allowed_down == :yes
+          # args.state.red_ghost.dir = 4 if (allowed_left == :yes && args.state.red_ghost.mode == :scatter)
+          args.state.red_ghost.dir = 1 if allowed_up == :yes
+          points_to_check.delete(:left) unless args.state.red_ghost.mode == :scatter
+        when 3 # down
           # if going down, check left, right, and down
           args.state.red_ghost.dir = 2 if allowed_right == :yes
-          args.state.red_ghost.dir = 4 if allowed_left == :yes
           args.state.red_ghost.dir = 3 if allowed_down == :yes
-        when 4
+          args.state.red_ghost.dir = 4 if allowed_left == :yes
+          # args.state.red_ghost.dir = 1 if (allowed_up == :yes && args.state.red_ghost.mode == :scatter)
+          points_to_check.delete(:up) unless args.state.red_ghost.mode == :scatter
+        when 4 # left
           # if going left, check up, down and left
-          args.state.red_ghost.dir = 1 if allowed_up == :yes
+          # args.state.red_ghost.dir = 2 if (allowed_right == :yes && args.state.red_ghost.mode == :scatter)
           args.state.red_ghost.dir = 3 if allowed_down == :yes
           args.state.red_ghost.dir = 4 if allowed_left == :yes
+          args.state.red_ghost.dir = 1 if allowed_up == :yes
+          points_to_check.delete(:right) unless args.state.red_ghost.mode == :scatter
       end
+
+      puts "points_to_check: #{points_to_check}"
+
+      # =begin
+      # check if we have a shortest distance to target without a tie
+      distances = {}
+
+      if args.state.red_ghost.mode == :scatter
+        target_x = args.state.red_ghost.home_x
+        target_y = args.state.red_ghost.home_y
+      else
+        target_x = args.state.red_ghost.target_x
+        target_y = args.state.red_ghost.target_y
+      end
+
+      points_to_check.each do |key, coord|
+        distances[key] = distance(target_x, target_y, coord[0], coord[1])
+      end
+
+      # Sort the distances by value
+      sorted_distances = distances.sort_by { |_, dist| dist }
+
+      # Get the smallest distance
+      min_distance = sorted_distances[0][1]
+
+      # Find all points with the smallest distance
+      closest_points = sorted_distances.select { |_, dist| dist == min_distance }
+
+      # Print results based on the number of closest points
+      if closest_points.size > 1
+        puts "There is a tie between the closest points:"
+        puts "Using default dir from above"
+      else
+        closest_point = closest_points.first[0]
+        coord = points_to_check[closest_point]
+        puts "The closest point to the target (#{target_x}, #{target_y}) is #{closest_point}: (#{coord[0]}, #{coord[1]})"
+        # 1 up, 2 right, 3 down, 4 left
+        case closest_point
+          when :up
+            puts"going up"
+            args.state.red_ghost.dir = 1
+          when :right
+            puts "going right"
+            args.state.red_ghost.dir = 2
+          when :down
+            puts "going down"
+            args.state.red_ghost.dir = 3
+          when :left
+            puts "going left"
+            args.state.red_ghost.dir = 4
+        end
+      end
+      # =end
     end
   end
   args.state.red_ghost.allowed_up = allowed_up
   args.state.red_ghost.allowed_right = allowed_right
   args.state.red_ghost.allowed_down = allowed_down
   args.state.red_ghost.allowed_left = allowed_left
-
-
-
-
-
-
-
-
-
-
-
-
-
 end
 
 def draw_dots(args)

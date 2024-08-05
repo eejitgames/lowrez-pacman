@@ -107,6 +107,7 @@ def tick(args)
   draw_red_ghost args
   draw_lives args
   draw_pacman args
+  check_pacman_hit_status args
   # render_debug args
   return if game_has_lost_focus?
   player_input args if Kernel.tick_count.zmod? args.state.pacman.speed
@@ -115,9 +116,19 @@ def tick(args)
   move_red_ghost args if Kernel.tick_count.zmod? args.state.red_ghost.speed
 end
 
+def check_pacman_hit_status(args)
+  # check if hit red ghost
+  if args.state.pacman.grid_x == args.state.red_ghost.grid_x && args.state.pacman.grid_y == args.state.red_ghost.grid_y && args.state.red_ghost.mode == :scatter
+    args.state.red_ghost.mode = :eyes
+    args.state.red_ghost.target_x = 16
+    args.state.red_ghost.target_y = 22
+    args.state.red_ghost.speed = 1
+  end
+end
+
 def ghost_mode(args)
   # Use Numeric#elapsed_time to determine how long it's been
-  if args.state.pacman.powered_up.elapsed_time > 60 * 9 # 9 seconds
+  if args.state.pacman.powered_up.elapsed_time > 60 * 90 # 9 seconds
     args.state.red_ghost.speed = 2
     args.state.red_ghost.mode = :chase
   end
@@ -137,8 +148,10 @@ def move_red_ghost(args)
   end
 
   #set target square to where pacman is
-  args.state.red_ghost.target_x = args.state.pacman.grid_x
-  args.state.red_ghost.target_y = args.state.pacman.grid_y
+  if args.state.red_ghost.mode == :chase
+    args.state.red_ghost.target_x = args.state.pacman.grid_x
+    args.state.red_ghost.target_y = args.state.pacman.grid_y
+  end
 
   move_x = args.state.red_ghost.move_x
   move_y = args.state.red_ghost.move_y
@@ -449,9 +462,9 @@ def draw_score(args)
     text: "#{args.state.pacman.score}",
     size_enum: LOWREZ_FONT_TI,
     alignment_enum: 1,
-    r: 100,
-    g: 100,
-    b: 100,
+    r: 220,
+    g: 220,
+    b: 220,
     a: 255,
     font: LOWREZ_FONT_PATH
   }

@@ -132,7 +132,6 @@ def exit_ghost_pen(args)
   end
 
   if ((args.state.blinky.mode == :ghost_exit) && (args.state.blinky.y == 90))
-    putz "we are outta here"
     args.state.blinky.mode = :chase
     args.state.blinky.dir = 4
     args.state.blinky.pen = :no
@@ -359,7 +358,6 @@ def move_blinky(args)
           points_to_check.delete(:right) # unless args.state.blinky.mode == :scatter
       end
 
-      # putz "points_to_check: #{points_to_check}"
       # check if we have a shortest distance to target without a tie
       distances = {}
 
@@ -395,16 +393,12 @@ def move_blinky(args)
         # 1 up, 2 right, 3 down, 4 left
         case closest_point
           when :up
-            # putz "going up"
             args.state.blinky.dir = 1
           when :right
-            # putz "going right"
             args.state.blinky.dir = 2
           when :down
-            # putz "going down"
             args.state.blinky.dir = 3
           when :left
-            # putz "going left"
             args.state.blinky.dir = 4
         end
       end

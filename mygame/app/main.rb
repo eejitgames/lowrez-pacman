@@ -388,6 +388,16 @@ def move_red_ghost(args)
   args.state.red_ghost.allowed_right = allowed_right
   args.state.red_ghost.allowed_down = allowed_down
   args.state.red_ghost.allowed_left = allowed_left
+
+  if args.state.red_ghost.mode == :eyes
+    if ((args.state.red_ghost.grid_x == 16) && (args.state.red_ghost.grid_y == 22))
+      args.state.red_ghost.pen == :yes
+      args.state.red_ghost.mode = :chase
+      args.state.red_ghost.dir = 1
+      args.state.red_ghost.x = 67
+      args.state.red_ghost.y = 78
+    end
+  end
 end
 
 def draw_dots(args)
@@ -648,6 +658,7 @@ end
 def draw_red_ghost(args)
   sprite_path  = "sprites/red-ghost-#{args.state.red_ghost.dir}.png"
   sprite_path  = "sprites/ghost-flee.png" if args.state.red_ghost.mode == :scatter
+  sprite_path  = "sprites/ghost-eyes-#{args.state.red_ghost.dir}.png" if args.state.red_ghost.mode == :eyes
   args.lowrez.primitives << {
     x: (0 - args.state.pacman.mx + 1) + args.state.red_ghost.x,
     y: (0 - args.state.pacman.my) + args.state.red_ghost.y,

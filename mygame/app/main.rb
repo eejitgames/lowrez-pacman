@@ -70,7 +70,7 @@ def init(args)
     ghost_score: 200
   }
 
-  args.state.red_ghost = {
+  args.state.blinky = {
     x: 67,
     y: 90,
     mx: 35,
@@ -106,7 +106,7 @@ def tick(args)
   draw_maze args
   draw_dots args
   draw_score args
-  draw_red_ghost args
+  draw_blinky args
   draw_lives args
   draw_pacman args
   check_pacman_hit_status args
@@ -115,50 +115,50 @@ def tick(args)
   player_input args if Kernel.tick_count.zmod? args.state.pacman.speed
   ghost_mode args
   return if args.state.pacman.dir == 0 # pacman has not moved yet, the game has not started
-  move_red_ghost args if Kernel.tick_count.zmod? args.state.red_ghost.speed
+  move_blinky args if Kernel.tick_count.zmod? args.state.blinky.speed
   exit_ghost_pen args
 end
 
 def exit_ghost_pen(args)
   # Use Numeric#elapsed_time to determine how long it's been
-  # args.state.red_ghost.entered_pen_time = Kernel.tick_count
-  if ((args.state.red_ghost.pen ==:yes) && (args.state.red_ghost.entered_pen_time.elapsed_time > 60 * 12)) # 12 seconds
-    args.state.red_ghost.speed = 2
-    args.state.red_ghost.mode = :ghost_exit
+  # args.state.blinky.entered_pen_time = Kernel.tick_count
+  if ((args.state.blinky.pen ==:yes) && (args.state.blinky.entered_pen_time.elapsed_time > 60 * 12)) # 12 seconds
+    args.state.blinky.speed = 2
+    args.state.blinky.mode = :ghost_exit
     args.state.red.ghost.skip_frame = :true
-    # args.state.red_ghost.target_x = args.state.red_ghost.home_x
-    # args.state.red_ghost.target_y = args.state.red_ghost.home_y
+    # args.state.blinky.target_x = args.state.blinky.home_x
+    # args.state.blinky.target_y = args.state.blinky.home_y
   end
 
-  if ((args.state.red_ghost.mode == :ghost_exit) && (args.state.red_ghost.x == 65))
-    args.state.red_ghost.dir = 1
+  if ((args.state.blinky.mode == :ghost_exit) && (args.state.blinky.x == 65))
+    args.state.blinky.dir = 1
   end
 
-  if ((args.state.red_ghost.mode == :ghost_exit) && (args.state.red_ghost.y == 90))
+  if ((args.state.blinky.mode == :ghost_exit) && (args.state.blinky.y == 90))
     putz "we are outta here"
-    args.state.red_ghost.mode = :chase
-    args.state.red_ghost.dir = 4
-    args.state.red_ghost.pen = :no
+    args.state.blinky.mode = :chase
+    args.state.blinky.dir = 4
+    args.state.blinky.pen = :no
   end
 end
 
 def check_pacman_hit_status(args)
   # check if hit red ghost
-  if args.state.pacman.grid_x == args.state.red_ghost.grid_x && args.state.pacman.grid_y == args.state.red_ghost.grid_y && args.state.red_ghost.mode == :scatter
+  if args.state.pacman.grid_x == args.state.blinky.grid_x && args.state.pacman.grid_y == args.state.blinky.grid_y && args.state.blinky.mode == :scatter
     args.state.pacman.score += args.state.pacman.ghost_score
     args.state.pacman.ghost_score *= 2
-    args.state.red_ghost.mode = :eyes
-    args.state.red_ghost.target_x = 16
-    args.state.red_ghost.target_y = 22
-    args.state.red_ghost.speed = 1
+    args.state.blinky.mode = :eyes
+    args.state.blinky.target_x = 16
+    args.state.blinky.target_y = 22
+    args.state.blinky.speed = 1
   end
 end
 
 def ghost_mode(args)
   # Use Numeric#elapsed_time to determine how long it's been
   if args.state.pacman.powered_up.elapsed_time > 60 * 9 # 9 seconds
-    args.state.red_ghost.speed = 2 unless args.state.red_ghost.pen == :yes
-    args.state.red_ghost.mode = :chase unless args.state.red_ghost.pen == :yes
+    args.state.blinky.speed = 2 unless args.state.blinky.pen == :yes
+    args.state.blinky.mode = :chase unless args.state.blinky.pen == :yes
     args.state.pacman.ghost_score = 200
   end
 end
@@ -167,73 +167,73 @@ def distance(x1, y1, x2, y2)
   (x2 - x1)**2 + (y2 - y1)**2
 end
 
-def move_red_ghost(args)
+def move_blinky(args)
   # move routine for when ghost is outside the pen only
-  # return unless args.state.red_ghost.pen == :no
+  # return unless args.state.blinky.pen == :no
 
-  if args.state.red_ghost.skip_frame == :true
-    args.state.red_ghost.skip_frame = :false
+  if args.state.blinky.skip_frame == :true
+    args.state.blinky.skip_frame = :false
     return
   end
 
   #set target square to where pacman is
-  if args.state.red_ghost.mode == :chase
-    args.state.red_ghost.target_x = args.state.pacman.grid_x
-    args.state.red_ghost.target_y = args.state.pacman.grid_y
+  if args.state.blinky.mode == :chase
+    args.state.blinky.target_x = args.state.pacman.grid_x
+    args.state.blinky.target_y = args.state.pacman.grid_y
   end
 
-  move_x = args.state.red_ghost.move_x
-  move_y = args.state.red_ghost.move_y
-  point_x = args.state.red_ghost.x
-  point_y = args.state.red_ghost.y
+  move_x = args.state.blinky.move_x
+  move_y = args.state.blinky.move_y
+  point_x = args.state.blinky.x
+  point_y = args.state.blinky.y
 
   # try to move forward
-  case args.state.red_ghost[:dir]
+  case args.state.blinky[:dir]
     when 1
-      if (((args.state.red_ghost.x - 1) % 4) == 0) && ((args.state.maze[(point_y / 4).floor + 1][(point_x / 4).floor]) < 9) ||
-         ((args.state.maze[(point_y / 4).floor + 1][(point_x / 4).floor] < 11) && (args.state.red_ghost.mode == :ghost_exit))
+      if (((args.state.blinky.x - 1) % 4) == 0) && ((args.state.maze[(point_y / 4).floor + 1][(point_x / 4).floor]) < 9) ||
+         ((args.state.maze[(point_y / 4).floor + 1][(point_x / 4).floor] < 11) && (args.state.blinky.mode == :ghost_exit))
         move_x = 0
         move_y = 1
       else
         move_x = 0
         move_y = 0
       end
-      args.state.red_ghost.y += 1 if (move_y == 0) && (((args.state.red_ghost.y - 2) % 4) != 0)
+      args.state.blinky.y += 1 if (move_y == 0) && (((args.state.blinky.y - 2) % 4) != 0)
     when 2
-      if (((args.state.red_ghost.y + 2) % 4) == 0) && ((args.state.maze[(point_y / 4).floor][(point_x / 4).floor + 1]) < 9)
+      if (((args.state.blinky.y + 2) % 4) == 0) && ((args.state.maze[(point_y / 4).floor][(point_x / 4).floor + 1]) < 9)
         move_x = 1
         move_y = 0
       else
         move_x = 0
         move_y = 0
       end
-        args.state.red_ghost.x += 1 if (move_x == 0) && (((args.state.red_ghost.x - 1) % 4) != 0)
+        args.state.blinky.x += 1 if (move_x == 0) && (((args.state.blinky.x - 1) % 4) != 0)
     when 3
-      if (((args.state.red_ghost.x - 1) % 4) == 0) && ((args.state.maze[(point_y / 4).floor - 1][(point_x / 4).floor]) < 9)
+      if (((args.state.blinky.x - 1) % 4) == 0) && ((args.state.maze[(point_y / 4).floor - 1][(point_x / 4).floor]) < 9)
         move_x = 0
         move_y = -1
       else
         move_x = 0
         move_y = 0
       end
-        args.state.red_ghost.y -= 1 if (move_y == 0) && (((args.state.red_ghost.y - 2) % 4) != 0)
+        args.state.blinky.y -= 1 if (move_y == 0) && (((args.state.blinky.y - 2) % 4) != 0)
     when 4
-      if (((args.state.red_ghost.y + 2) % 4) == 0) && ((args.state.maze[(point_y / 4).floor][(point_x / 4).floor - 1]) < 9)
+      if (((args.state.blinky.y + 2) % 4) == 0) && ((args.state.maze[(point_y / 4).floor][(point_x / 4).floor - 1]) < 9)
         move_x = -1
         move_y = 0
       else
         move_x = 0
         move_y = 0
       end
-      args.state.red_ghost.x -= 1 if (move_x == 0) && (((args.state.red_ghost.x - 1) % 4) != 0)
+      args.state.blinky.x -= 1 if (move_x == 0) && (((args.state.blinky.x - 1) % 4) != 0)
   end
 
-  args.state.red_ghost.mx += move_x
-  args.state.red_ghost.my += move_y
-  args.state.red_ghost.x += move_x
-  args.state.red_ghost.y += move_y
+  args.state.blinky.mx += move_x
+  args.state.blinky.my += move_y
+  args.state.blinky.x += move_x
+  args.state.blinky.y += move_y
 
-  point_to_grid_red_ghost args, args.state.red_ghost.x, args.state.red_ghost.y
+  point_to_grid_blinky args, args.state.blinky.x, args.state.blinky.y
 
   # Ok we have moved, check if we are in a corner or at a junction where a turn decision/change of direction happens
   # 1 is an oridinary dot
@@ -243,41 +243,41 @@ def move_red_ghost(args)
   # 5 is a corner, with a dot
   # 6 is a corner, without a dot
 
-  args.state.red_ghost_in_a_corner = :no
-  args.state.red_ghost_in_a_junction = :no
-  red_ghost_over = args.state.maze[args.state.red_ghost.grid_y][args.state.red_ghost.grid_x]
+  args.state.blinky_in_a_corner = :no
+  args.state.blinky_in_a_junction = :no
+  blinky_over = args.state.maze[args.state.blinky.grid_y][args.state.blinky.grid_x]
 
-  if (red_ghost_over == 5 || red_ghost_over == 6 || red_ghost_over == 7) && (((args.state.red_ghost.x - 1 ) % 4) == 0) && (((args.state.red_ghost.y - 2 ) % 4) == 0)
-    args.state.red_ghost_in_a_corner = :yes
+  if (blinky_over == 5 || blinky_over == 6 || blinky_over == 7) && (((args.state.blinky.x - 1 ) % 4) == 0) && (((args.state.blinky.y - 2 ) % 4) == 0)
+    args.state.blinky_in_a_corner = :yes
   end
 
   # stall ghost slightly in a corner, helps a tiny bit ;)
-  if args.state.red_ghost_in_a_corner == :yes && args.state.red.ghost.skip_frame == :true
+  if args.state.blinky_in_a_corner == :yes && args.state.red.ghost.skip_frame == :true
     args.state.red.ghost.skip_frame = :false
     return
   end
 
-  if (red_ghost_over == 3 || red_ghost_over == 4) && (((args.state.red_ghost.x - 1 ) % 4) == 0) && (((args.state.red_ghost.y - 2 ) % 4) == 0)
-    args.state.red_ghost_in_a_junction = :yes
+  if (blinky_over == 3 || blinky_over == 4) && (((args.state.blinky.x - 1 ) % 4) == 0) && (((args.state.blinky.y - 2 ) % 4) == 0)
+    args.state.blinky_in_a_junction = :yes
   end
 
   allowed_up = :no
   allowed_right = :no
   allowed_down = :no
   allowed_left = :no
-  if args.state.red_ghost_in_a_corner == :yes || args.state.red_ghost_in_a_junction == :yes
+  if args.state.blinky_in_a_corner == :yes || args.state.blinky_in_a_junction == :yes
     # we are at a corner or junction, capture the grid coordinates of the four possible options
-    grid_up_x    = args.state.red_ghost.grid_x
-    grid_up_y    = args.state.red_ghost.grid_y + 1
+    grid_up_x    = args.state.blinky.grid_x
+    grid_up_y    = args.state.blinky.grid_y + 1
 
-    grid_right_x = args.state.red_ghost.grid_x + 1
-    grid_right_y = args.state.red_ghost.grid_y
+    grid_right_x = args.state.blinky.grid_x + 1
+    grid_right_y = args.state.blinky.grid_y
 
-    grid_down_x  = args.state.red_ghost.grid_x
-    grid_down_y  = args.state.red_ghost.grid_y - 1
+    grid_down_x  = args.state.blinky.grid_x
+    grid_down_y  = args.state.blinky.grid_y - 1
 
-    grid_left_x  = args.state.red_ghost.grid_x - 1
-    grid_left_y  = args.state.red_ghost.grid_y
+    grid_left_x  = args.state.blinky.grid_x - 1
+    grid_left_y  = args.state.blinky.grid_y
 
     # check which directions are available including backwards (only allowed when in scatter mode)
     # 1 up, 2 right, 3 down, 4 left
@@ -291,7 +291,7 @@ def move_red_ghost(args)
     if args.state.maze[grid_up_y][grid_up_x] < 9
       allowed_up    = :yes
       points_to_check[:up] = [grid_up_x, grid_up_y]
-    elsif ((args.state.maze[grid_up_y][grid_up_x] < 11) && (args.state.red_ghost.mode == :ghost_exit))
+    elsif ((args.state.maze[grid_up_y][grid_up_x] < 11) && (args.state.blinky.mode == :ghost_exit))
       allowed_up    = :yes
       points_to_check[:up] = [grid_up_x, grid_up_y]
     end
@@ -309,74 +309,74 @@ def move_red_ghost(args)
     end
 
     # for a corner loop over the directions skipping the current dir and it's opposite
-    if args.state.red_ghost_in_a_corner == :yes
-      case args.state.red_ghost.dir
+    if args.state.blinky_in_a_corner == :yes
+      case args.state.blinky.dir
         when 1
         # if going up, check left and right
-          args.state.red_ghost.dir = 2 if allowed_right == :yes
-          args.state.red_ghost.dir = 4 if allowed_left == :yes
+          args.state.blinky.dir = 2 if allowed_right == :yes
+          args.state.blinky.dir = 4 if allowed_left == :yes
         when 2
           # if going right, check up and down
-          args.state.red_ghost.dir = 1 if allowed_up == :yes
-          args.state.red_ghost.dir = 3 if allowed_down == :yes
-          args.state.red_ghost.dir = 4 if ((allowed_left == :yes) && (args.state.red_ghost.pen == :yes))
+          args.state.blinky.dir = 1 if allowed_up == :yes
+          args.state.blinky.dir = 3 if allowed_down == :yes
+          args.state.blinky.dir = 4 if ((allowed_left == :yes) && (args.state.blinky.pen == :yes))
         when 3
           # if going down, check left and right
-          args.state.red_ghost.dir = 2 if allowed_right == :yes
-          args.state.red_ghost.dir = 4 if allowed_left == :yes
+          args.state.blinky.dir = 2 if allowed_right == :yes
+          args.state.blinky.dir = 4 if allowed_left == :yes
         when 4
           # if going left, check up and down
-          args.state.red_ghost.dir = 1 if allowed_up == :yes
-          args.state.red_ghost.dir = 3 if allowed_down == :yes
-          args.state.red_ghost.dir = 2 if ((allowed_right == :yes) && (args.state.red_ghost.pen == :yes))
+          args.state.blinky.dir = 1 if allowed_up == :yes
+          args.state.blinky.dir = 3 if allowed_down == :yes
+          args.state.blinky.dir = 2 if ((allowed_right == :yes) && (args.state.blinky.pen == :yes))
       end
     end
 
     # for a junction loop over the directions optionally skipping the opposite
     # To break a tie, the ghost prefers directions in this order: up, left, down, right
-    if args.state.red_ghost_in_a_junction == :yes
+    if args.state.blinky_in_a_junction == :yes
     # this sets a default in the case there is a tie in the distance
-      case args.state.red_ghost.dir
+      case args.state.blinky.dir
         when 1 # up
         # if going up, check left, right and up
-          args.state.red_ghost.dir = 2 if allowed_right == :yes
-          # args.state.red_ghost.dir = 3 if (allowed_down == :yes && args.state.red_ghost.mode == :scatter)
-          args.state.red_ghost.dir = 4 if allowed_left == :yes
-          args.state.red_ghost.dir = 1 if allowed_up == :yes
-          points_to_check.delete(:down) # unless args.state.red_ghost.mode == :scatter
+          args.state.blinky.dir = 2 if allowed_right == :yes
+          # args.state.blinky.dir = 3 if (allowed_down == :yes && args.state.blinky.mode == :scatter)
+          args.state.blinky.dir = 4 if allowed_left == :yes
+          args.state.blinky.dir = 1 if allowed_up == :yes
+          points_to_check.delete(:down) # unless args.state.blinky.mode == :scatter
         when 2 # right
           # if going right, check up, down, and right
-          args.state.red_ghost.dir = 2 if allowed_right == :yes
-          args.state.red_ghost.dir = 3 if allowed_down == :yes
-          # args.state.red_ghost.dir = 4 if (allowed_left == :yes && args.state.red_ghost.mode == :scatter)
-          args.state.red_ghost.dir = 1 if allowed_up == :yes
-          points_to_check.delete(:left) # unless args.state.red_ghost.mode == :scatter
+          args.state.blinky.dir = 2 if allowed_right == :yes
+          args.state.blinky.dir = 3 if allowed_down == :yes
+          # args.state.blinky.dir = 4 if (allowed_left == :yes && args.state.blinky.mode == :scatter)
+          args.state.blinky.dir = 1 if allowed_up == :yes
+          points_to_check.delete(:left) # unless args.state.blinky.mode == :scatter
         when 3 # down
           # if going down, check left, right, and down
-          args.state.red_ghost.dir = 2 if allowed_right == :yes
-          args.state.red_ghost.dir = 3 if allowed_down == :yes
-          args.state.red_ghost.dir = 4 if allowed_left == :yes
-          # args.state.red_ghost.dir = 1 if (allowed_up == :yes && args.state.red_ghost.mode == :scatter)
-          points_to_check.delete(:up) # unless args.state.red_ghost.mode == :scatter
+          args.state.blinky.dir = 2 if allowed_right == :yes
+          args.state.blinky.dir = 3 if allowed_down == :yes
+          args.state.blinky.dir = 4 if allowed_left == :yes
+          # args.state.blinky.dir = 1 if (allowed_up == :yes && args.state.blinky.mode == :scatter)
+          points_to_check.delete(:up) # unless args.state.blinky.mode == :scatter
         when 4 # left
           # if going left, check up, down and left
-          # args.state.red_ghost.dir = 2 if (allowed_right == :yes && args.state.red_ghost.mode == :scatter)
-          args.state.red_ghost.dir = 3 if allowed_down == :yes
-          args.state.red_ghost.dir = 4 if allowed_left == :yes
-          args.state.red_ghost.dir = 1 if allowed_up == :yes
-          points_to_check.delete(:right) # unless args.state.red_ghost.mode == :scatter
+          # args.state.blinky.dir = 2 if (allowed_right == :yes && args.state.blinky.mode == :scatter)
+          args.state.blinky.dir = 3 if allowed_down == :yes
+          args.state.blinky.dir = 4 if allowed_left == :yes
+          args.state.blinky.dir = 1 if allowed_up == :yes
+          points_to_check.delete(:right) # unless args.state.blinky.mode == :scatter
       end
 
       # putz "points_to_check: #{points_to_check}"
       # check if we have a shortest distance to target without a tie
       distances = {}
 
-      if args.state.red_ghost.mode == :scatter
-        target_x = args.state.red_ghost.home_x
-        target_y = args.state.red_ghost.home_y
+      if args.state.blinky.mode == :scatter
+        target_x = args.state.blinky.home_x
+        target_y = args.state.blinky.home_y
       else
-        target_x = args.state.red_ghost.target_x
-        target_y = args.state.red_ghost.target_y
+        target_x = args.state.blinky.target_x
+        target_y = args.state.blinky.target_y
       end
 
       points_to_check.each do |key, coord|
@@ -404,40 +404,40 @@ def move_red_ghost(args)
         case closest_point
           when :up
             # putz "going up"
-            args.state.red_ghost.dir = 1
+            args.state.blinky.dir = 1
           when :right
             # putz "going right"
-            args.state.red_ghost.dir = 2
+            args.state.blinky.dir = 2
           when :down
             # putz "going down"
-            args.state.red_ghost.dir = 3
+            args.state.blinky.dir = 3
           when :left
             # putz "going left"
-            args.state.red_ghost.dir = 4
+            args.state.blinky.dir = 4
         end
       end
     end
     args.state.red.ghost.skip_frame = :true
   end
-  args.state.red_ghost.allowed_up = allowed_up
-  args.state.red_ghost.allowed_right = allowed_right
-  args.state.red_ghost.allowed_down = allowed_down
-  args.state.red_ghost.allowed_left = allowed_left
+  args.state.blinky.allowed_up = allowed_up
+  args.state.blinky.allowed_right = allowed_right
+  args.state.blinky.allowed_down = allowed_down
+  args.state.blinky.allowed_left = allowed_left
 
-  if args.state.red_ghost.mode == :eyes
+  if args.state.blinky.mode == :eyes
     # ghost is just above the pen, put him in it
-    if ((args.state.red_ghost.grid_x == 16) && (args.state.red_ghost.grid_y == 22))
-      args.state.red_ghost.speed = 10
-      args.state.red_ghost.pen = :yes
-      args.state.red_ghost.mode = :chase
-      args.state.red_ghost.dir = 4
-      args.state.red_ghost.x = 67
-      args.state.red_ghost.y = 78
-      args.state.red_ghost.grid_x = 16
-      args.state.red_ghost.grid_y = 19
-      args.state.red_ghost.entered_pen_time = Kernel.tick_count
-      args.state.red_ghost.target_x = 15 # a square north of the pen exit
-      args.state.red_ghost.target_y = 25
+    if ((args.state.blinky.grid_x == 16) && (args.state.blinky.grid_y == 22))
+      args.state.blinky.speed = 10
+      args.state.blinky.pen = :yes
+      args.state.blinky.mode = :chase
+      args.state.blinky.dir = 4
+      args.state.blinky.x = 67
+      args.state.blinky.y = 78
+      args.state.blinky.grid_x = 16
+      args.state.blinky.grid_y = 19
+      args.state.blinky.entered_pen_time = Kernel.tick_count
+      args.state.blinky.target_x = 15 # a square north of the pen exit
+      args.state.blinky.target_y = 25
     end
   end
 end
@@ -562,11 +562,11 @@ def grid_highlight(args)
   }
 end
 
-def grid_highlight_red_ghost(args)
+def grid_highlight_blinky(args)
   grid_size = 4 # each grid cell is 4x4 pixels
 
-  grid_x = args.state.red_ghost.grid_x
-  grid_y = args.state.red_ghost.grid_y
+  grid_x = args.state.blinky.grid_x
+  grid_y = args.state.blinky.grid_y
 
   # Calculate the screen coordinates for the highlighted grid cell
   x = grid_x * grid_size
@@ -595,13 +595,13 @@ def point_to_grid(args, point_x, point_y)
 end
 
 
-def point_to_grid_red_ghost(args, point_x, point_y)
+def point_to_grid_blinky(args, point_x, point_y)
   # determine which grid section a point is in
   size_x = 4 # 136 / 34
   size_y = 4 # 148 / 37
 
-  args.state.red_ghost.grid_x = (point_x / size_x).floor
-  args.state.red_ghost.grid_y = (point_y / size_y).floor
+  args.state.blinky.grid_x = (point_x / size_x).floor
+  args.state.blinky.grid_y = (point_y / size_y).floor
 end
 
 # 1 up, 2 right, 3 down, 4 left (0 for stationary until a key is pressed)
@@ -674,22 +674,22 @@ def player_input(args)
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
       args.state.pacman.score += 50
       args.state.pacman.powered_up = Kernel.tick_count
-      args.state.red_ghost.speed = 8 unless args.state.red_ghost.pen == :yes
-      args.state.red_ghost.mode = :scatter unless args.state.red_ghost.pen == :yes
+      args.state.blinky.speed = 8 unless args.state.blinky.pen == :yes
+      args.state.blinky.mode = :scatter unless args.state.blinky.pen == :yes
     when 7
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
       args.state.pacman.score += 50
       args.state.pacman.powered_up = Kernel.tick_count
-      args.state.red_ghost.speed = 8 unless args.state.red_ghost.pen == :yes
-      args.state.red_ghost.mode = :scatter unless args.state.red_ghost.pen == :yes
+      args.state.blinky.speed = 8 unless args.state.blinky.pen == :yes
+      args.state.blinky.mode = :scatter unless args.state.blinky.pen == :yes
   end
 
   args.state.pacman.move_x = move_x
   args.state.pacman.move_y = move_y
   args.state.pacman.mx += move_x
   args.state.pacman.my += move_y
-  args.state.red_ghost.mx += move_x
-  args.state.red_ghost.my += move_y
+  args.state.blinky.mx += move_x
+  args.state.blinky.my += move_y
 
   # args.state.map_origin_x = 32 + args.state.pacman.mx
   # args.state.map_origin_y = 31 + args.state.pacman.my
@@ -697,13 +697,13 @@ def player_input(args)
   point_to_grid args, (32 + args.state.pacman.mx), (31 + args.state.pacman.my)
 end
 
-def draw_red_ghost(args)
-  sprite_path  = "sprites/red-ghost-#{args.state.red_ghost.dir}.png"
-  sprite_path  = "sprites/ghost-flee.png" if args.state.red_ghost.mode == :scatter
-  sprite_path  = "sprites/ghost-eyes-#{args.state.red_ghost.dir}.png" if args.state.red_ghost.mode == :eyes
+def draw_blinky(args)
+  sprite_path  = "sprites/red-ghost-#{args.state.blinky.dir}.png"
+  sprite_path  = "sprites/ghost-flee.png" if args.state.blinky.mode == :scatter
+  sprite_path  = "sprites/ghost-eyes-#{args.state.blinky.dir}.png" if args.state.blinky.mode == :eyes
   args.lowrez.primitives << {
-    x: (0 - args.state.pacman.mx + 1) + args.state.red_ghost.x,
-    y: (0 - args.state.pacman.my) + args.state.red_ghost.y,
+    x: (0 - args.state.pacman.mx + 1) + args.state.blinky.x,
+    y: (0 - args.state.pacman.my) + args.state.blinky.y,
     w: 8,
     h: 8,
     path: sprite_path,
@@ -772,11 +772,11 @@ end
 
 def render_debug(args)
   grid_highlight args
-  grid_highlight_red_ghost args
+  grid_highlight_blinky args
   # this is the point to determine which part of the grid red ghost is in
   args.lowrez.primitives << {
-    x: (0 - args.state.pacman.mx) + args.state.red_ghost.x,
-    y: (0 - args.state.pacman.my) + args.state.red_ghost.y,
+    x: (0 - args.state.pacman.mx) + args.state.blinky.x,
+    y: (0 - args.state.pacman.my) + args.state.blinky.y,
     w: 1,
     h: 1,
     r: 200,
@@ -842,19 +842,19 @@ def render_debug(args)
     "grid position grid_x, grid_y:   #{args.state.pacman.grid_x}, #{args.state.pacman.grid_y}",
     # "pacman coors on screen x, y:    #{args.state.pacman[:x] + args.state.offset[args.state.pacman.dir].x}, #{args.state.pacman[:y] + args.state.offset[args.state.pacman.dir].y}",
     # "maze status at grid coors:      #{args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x]}",
-    # "red ghost map pos mx, my:       #{32 + args.state.red_ghost.mx}, #{31 + args.state.red_ghost.my}",
-    "red ghost grid grid_x, grid_y:  #{args.state.red_ghost.grid_x}, #{args.state.red_ghost.grid_y}",
-    "red ghost world coors x, y:    #{args.state.red_ghost[:x]}, #{args.state.red_ghost[:y]}",
+    # "red ghost map pos mx, my:       #{32 + args.state.blinky.mx}, #{31 + args.state.blinky.my}",
+    "red ghost grid grid_x, grid_y:  #{args.state.blinky.grid_x}, #{args.state.blinky.grid_y}",
+    "red ghost world coors x, y:    #{args.state.blinky[:x]}, #{args.state.blinky[:y]}",
     # "args.state.map_origin ox, oy:    #{args.state.map_origin_x}, #{args.state.map_origin_y}",
-    "red ghost is hovering over:     #{args.state.maze[args.state.red_ghost.grid_y][args.state.red_ghost.grid_x]}",
-    "red ghost in a maze corner:     #{args.state.red_ghost_in_a_corner}",
-    "red ghost in a maze junction:   #{args.state.red_ghost_in_a_junction}",
-    "red ghost is allowed up:        #{args.state.red_ghost.allowed_up}",
-    "red ghost is allowed right:     #{args.state.red_ghost.allowed_right}",
-    "red ghost is allowed down:      #{args.state.red_ghost.allowed_down}",
-    "red ghost is allowed left:      #{args.state.red_ghost.allowed_left}",
-    "red ghost is direction:         #{args.state.red_ghost.dir}",
-    "red ghost is in mode:           #{args.state.red_ghost.mode}"
+    "red ghost is hovering over:     #{args.state.maze[args.state.blinky.grid_y][args.state.blinky.grid_x]}",
+    "red ghost in a maze corner:     #{args.state.blinky_in_a_corner}",
+    "red ghost in a maze junction:   #{args.state.blinky_in_a_junction}",
+    "red ghost is allowed up:        #{args.state.blinky.allowed_up}",
+    "red ghost is allowed right:     #{args.state.blinky.allowed_right}",
+    "red ghost is allowed down:      #{args.state.blinky.allowed_down}",
+    "red ghost is allowed left:      #{args.state.blinky.allowed_left}",
+    "red ghost is direction:         #{args.state.blinky.dir}",
+    "red ghost is in mode:           #{args.state.blinky.mode}"
   ]
 
   args.outputs.debug << args.state

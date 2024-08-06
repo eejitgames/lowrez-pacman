@@ -66,7 +66,8 @@ def init(args)
     anim: :no,
     frame: 0,
     powered_up: 0,
-    speed: 2
+    speed: 2,
+    ghost_score: 200
   }
 
   args.state.red_ghost = {
@@ -144,6 +145,8 @@ end
 def check_pacman_hit_status(args)
   # check if hit red ghost
   if args.state.pacman.grid_x == args.state.red_ghost.grid_x && args.state.pacman.grid_y == args.state.red_ghost.grid_y && args.state.red_ghost.mode == :scatter
+    args.state.pacman.score += args.state.pacman.ghost_score
+    args.state.pacman.ghost_score *= 2
     args.state.red_ghost.mode = :eyes
     args.state.red_ghost.target_x = 16
     args.state.red_ghost.target_y = 22
@@ -156,6 +159,7 @@ def ghost_mode(args)
   if args.state.pacman.powered_up.elapsed_time > 60 * 9 # 9 seconds
     args.state.red_ghost.speed = 2 unless args.state.red_ghost.pen == :yes
     args.state.red_ghost.mode = :chase unless args.state.red_ghost.pen == :yes
+    args.state.pacman.ghost_score = 200
   end
 end
 

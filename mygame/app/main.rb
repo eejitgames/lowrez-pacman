@@ -638,14 +638,14 @@ def player_input(args)
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
       args.state.pacman.score += 50
       args.state.pacman.powered_up = Kernel.tick_count
-      args.state.red_ghost.speed = 4
+      args.state.red_ghost.speed = 8 unless args.state.red_ghost.pen == :yes
       args.state.red_ghost.mode = :scatter unless args.state.red_ghost.pen == :yes
     when 7
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
       args.state.pacman.score += 50
       args.state.pacman.powered_up = Kernel.tick_count
-      args.state.red_ghost.speed = 8
-      args.state.red_ghost.mode = :scatter
+      args.state.red_ghost.speed = 8 unless args.state.red_ghost.pen == :yes
+      args.state.red_ghost.mode = :scatter unless args.state.red_ghost.pen == :yes
   end
 
   args.state.pacman.move_x = move_x

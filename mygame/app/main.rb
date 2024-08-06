@@ -27,7 +27,7 @@ def init(args)
     [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  6,  0,  0,  4,  0,  0,  4,  0,  0,  6, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
     [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  0, 37, 18, 40, 43, 43, 41, 18, 39,  0, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
     [ 9,  9,  9, 12, 12, 12, 12, 12, 20,  1, 22, 20,  0, 24, 10, 10, 10, 10, 10, 10, 16,  0, 22, 20,  1, 22, 12, 12, 12, 12, 12,  9,  9,  9 ],
-    [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  3,  0,  0,  4, 24, 10, 10, 10, 10, 10, 10, 16,  4,  0,  0,  3,  9,  9,  9,  9,  9,  9,  9,  9,  9 ],
+    [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  3,  0,  0,  4, 24,  6,  0,  0,  0,  0,  6, 16,  4,  0,  0,  3,  9,  9,  9,  9,  9,  9,  9,  9,  9 ],
     [ 9,  9,  9, 18, 18, 18, 18, 18, 19,  1, 26, 19,  0, 24, 10, 10, 10, 10, 10, 10, 16,  0, 26, 19,  1, 26, 18, 18, 18, 18, 18,  9,  9,  9 ],
     [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  0, 38, 12, 12, 12, 12, 12, 12, 42,  0, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
     [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  4,  0,  0,  0,  0,  0,  0,  0,  0,  4, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
@@ -128,7 +128,7 @@ end
 
 def ghost_mode(args)
   # Use Numeric#elapsed_time to determine how long it's been
-  if args.state.pacman.powered_up.elapsed_time > 60 * 90 # 9 seconds
+  if args.state.pacman.powered_up.elapsed_time > 60 * 9 # 9 seconds
     args.state.red_ghost.speed = 2
     args.state.red_ghost.mode = :chase
   end
@@ -391,7 +391,7 @@ def move_red_ghost(args)
 
   if args.state.red_ghost.mode == :eyes
     if ((args.state.red_ghost.grid_x == 16) && (args.state.red_ghost.grid_y == 22))
-      args.state.red_ghost.pen == :yes
+      args.state.red_ghost.pen = :yes
       args.state.red_ghost.mode = :chase
       args.state.red_ghost.dir = 1
       args.state.red_ghost.x = 67
@@ -633,7 +633,7 @@ def player_input(args)
       args.state.pacman.score += 50
       args.state.pacman.powered_up = Kernel.tick_count
       args.state.red_ghost.speed = 4
-      args.state.red_ghost.mode = :scatter
+      args.state.red_ghost.mode = :scatter unless args.state.red_ghost.pen == :yes
     when 7
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
       args.state.pacman.score += 50

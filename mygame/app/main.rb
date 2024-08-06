@@ -121,14 +121,11 @@ end
 
 def exit_ghost_pen(args)
   # Use Numeric#elapsed_time to determine how long it's been
-  # args.state.blinky.entered_pen_time = Kernel.tick_count
   if ((args.state.blinky.pen ==:yes) && (args.state.blinky.entered_pen_time.elapsed_time > 60 * 12)) # 12 seconds
     args.state.blinky.speed = 2
     args.state.blinky.mode = :ghost_exit
-    args.state.red.ghost.skip_frame = :true
-    # args.state.blinky.target_x = args.state.blinky.home_x
-    # args.state.blinky.target_y = args.state.blinky.home_y
-  end
+    args.state.blinky.skip_frame = :true
+   end
 
   if ((args.state.blinky.mode == :ghost_exit) && (args.state.blinky.x == 65))
     args.state.blinky.dir = 1
@@ -170,11 +167,6 @@ end
 def move_blinky(args)
   # move routine for when ghost is outside the pen only
   # return unless args.state.blinky.pen == :no
-
-  if args.state.blinky.skip_frame == :true
-    args.state.blinky.skip_frame = :false
-    return
-  end
 
   #set target square to where pacman is
   if args.state.blinky.mode == :chase
@@ -252,8 +244,8 @@ def move_blinky(args)
   end
 
   # stall ghost slightly in a corner, helps a tiny bit ;)
-  if args.state.blinky_in_a_corner == :yes && args.state.red.ghost.skip_frame == :true
-    args.state.red.ghost.skip_frame = :false
+  if args.state.blinky_in_a_corner == :yes && args.state.blinky.skip_frame == :true
+    args.state.blinky.skip_frame = :false
     return
   end
 
@@ -417,7 +409,7 @@ def move_blinky(args)
         end
       end
     end
-    args.state.red.ghost.skip_frame = :true
+    args.state.blinky.skip_frame = :true
   end
   args.state.blinky.allowed_up = allowed_up
   args.state.blinky.allowed_right = allowed_right
@@ -698,7 +690,7 @@ def player_input(args)
 end
 
 def draw_blinky(args)
-  sprite_path  = "sprites/red-ghost-#{args.state.blinky.dir}.png"
+  sprite_path  = "sprites/blinky-#{args.state.blinky.dir}.png"
   sprite_path  = "sprites/ghost-flee.png" if args.state.blinky.mode == :scatter
   sprite_path  = "sprites/ghost-eyes-#{args.state.blinky.dir}.png" if args.state.blinky.mode == :eyes
   args.lowrez.primitives << {

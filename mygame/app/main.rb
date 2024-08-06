@@ -25,9 +25,9 @@ def init(args)
     [ 9,  9,  9, 17, 18, 18, 18, 18, 19,  1, 21, 35, 28, 28, 19,  0, 21, 23,  0, 26, 28, 28, 36, 23,  1, 26, 18, 18, 18, 18, 25,  9,  9,  9 ],
     [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 34, 30, 30, 20,  0, 22, 20,  0, 22, 30, 30, 29, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
     [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  6,  0,  0,  4,  0,  0,  4,  0,  0,  6, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
-    [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  0, 37, 18, 40, 43, 43, 41, 18, 39,  0, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
-    [ 9,  9,  9, 12, 12, 12, 12, 12, 20,  1, 22, 20,  0, 24, 10, 10, 10, 10, 10, 10, 16,  0, 22, 20,  1, 22, 12, 12, 12, 12, 12,  9,  9,  9 ],
-    [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  3,  0,  0,  4, 24, 10,  6,  0,  0,  6, 10, 16,  4,  0,  0,  3,  9,  9,  9,  9,  9,  9,  9,  9,  9 ],
+    [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  0, 37, 18, 40,  9, 43, 41, 18, 39,  0, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
+    [ 9,  9,  9, 12, 12, 12, 12, 12, 20,  1, 22, 20,  0, 24, 10, 10,  9, 10, 10, 10, 16,  0, 22, 20,  1, 22, 12, 12, 12, 12, 12,  9,  9,  9 ],
+    [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  3,  0,  0,  4, 24, 10,  6,  4,  0,  6, 10, 16,  4,  0,  0,  3,  9,  9,  9,  9,  9,  9,  9,  9,  9 ],
     [ 9,  9,  9, 18, 18, 18, 18, 18, 19,  1, 26, 19,  0, 24, 10, 10, 10, 10, 10, 10, 16,  0, 26, 19,  1, 26, 18, 18, 18, 18, 18,  9,  9,  9 ],
     [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  0, 38, 12, 12, 12, 12, 12, 12, 42,  0, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
     [ 9,  9,  9, 10, 10, 10, 10, 10, 16,  1, 21, 23,  4,  0,  0,  0,  0,  0,  0,  0,  0,  4, 21, 23,  1, 24, 10, 10, 10, 10, 10,  9,  9,  9 ],
@@ -86,10 +86,11 @@ def init(args)
     pen: :no,
     mode: :chase, # mode either chase or scatter
     speed: 2,
-    skip_frame: :true
+    skip_frame: :true,
+    entered_pen_time: 0
   }
 
-  # to position sprite correctly
+  # to position pacman sprite correctly
   args.state.offset[0] = { x: 0, y: 1 }
   args.state.offset[1] = { x: 1, y: 1 }
   args.state.offset[2] = { x: 1, y: 0 }
@@ -114,6 +115,30 @@ def tick(args)
   ghost_mode args
   return if args.state.pacman.dir == 0 # pacman has not moved yet, the game has not started
   move_red_ghost args if Kernel.tick_count.zmod? args.state.red_ghost.speed
+  exit_ghost_pen args
+end
+
+def exit_ghost_pen(args)
+  # Use Numeric#elapsed_time to determine how long it's been
+  # args.state.red_ghost.entered_pen_time = Kernel.tick_count
+  if ((args.state.red_ghost.pen ==:yes) && (args.state.red_ghost.entered_pen_time.elapsed_time > 60 * 12)) # 12 seconds
+    args.state.red_ghost.speed = 2
+    args.state.red_ghost.mode = :ghost_exit
+    args.state.red.ghost.skip_frame = :true
+    # args.state.red_ghost.target_x = args.state.red_ghost.home_x
+    # args.state.red_ghost.target_y = args.state.red_ghost.home_y
+  end
+
+  if ((args.state.red_ghost.mode == :ghost_exit) && (args.state.red_ghost.x == 65))
+    args.state.red_ghost.dir = 1
+  end
+
+  if ((args.state.red_ghost.mode == :ghost_exit) && (args.state.red_ghost.y == 90))
+    putz "we are outta here"
+    args.state.red_ghost.mode = :chase
+    args.state.red_ghost.dir = 4
+    args.state.red_ghost.pen = :no
+  end
 end
 
 def check_pacman_hit_status(args)
@@ -130,7 +155,7 @@ def ghost_mode(args)
   # Use Numeric#elapsed_time to determine how long it's been
   if args.state.pacman.powered_up.elapsed_time > 60 * 9 # 9 seconds
     args.state.red_ghost.speed = 2 unless args.state.red_ghost.pen == :yes
-    args.state.red_ghost.mode = :chase
+    args.state.red_ghost.mode = :chase unless args.state.red_ghost.pen == :yes
   end
 end
 
@@ -161,7 +186,8 @@ def move_red_ghost(args)
   # try to move forward
   case args.state.red_ghost[:dir]
     when 1
-      if (((args.state.red_ghost.x - 1) % 4) == 0) && ((args.state.maze[(point_y / 4).floor + 1][(point_x / 4).floor]) < 9)
+      if (((args.state.red_ghost.x - 1) % 4) == 0) && ((args.state.maze[(point_y / 4).floor + 1][(point_x / 4).floor]) < 9) ||
+         ((args.state.maze[(point_y / 4).floor + 1][(point_x / 4).floor] < 11) && (args.state.red_ghost.mode == :ghost_exit))
         move_x = 0
         move_y = 1
       else
@@ -255,9 +281,13 @@ def move_red_ghost(args)
     allowed_right = :no
     allowed_down = :no
     allowed_left = :no
+
     # check the grid north, south, east, and west of current position, also update points to check
     points_to_check = {}
     if args.state.maze[grid_up_y][grid_up_x] < 9
+      allowed_up    = :yes
+      points_to_check[:up] = [grid_up_x, grid_up_y]
+    elsif ((args.state.maze[grid_up_y][grid_up_x] < 11) && (args.state.red_ghost.mode == :ghost_exit))
       allowed_up    = :yes
       points_to_check[:up] = [grid_up_x, grid_up_y]
     end
@@ -273,7 +303,6 @@ def move_red_ghost(args)
       allowed_left  = :yes
       points_to_check[:left] = [grid_left_x, grid_left_y]
     end
-
 
     # for a corner loop over the directions skipping the current dir and it's opposite
     if args.state.red_ghost_in_a_corner == :yes
@@ -402,6 +431,9 @@ def move_red_ghost(args)
       args.state.red_ghost.y = 78
       args.state.red_ghost.grid_x = 16
       args.state.red_ghost.grid_y = 19
+      args.state.red_ghost.entered_pen_time = Kernel.tick_count
+      args.state.red_ghost.target_x = 15 # a square north of the pen exit
+      args.state.red_ghost.target_y = 25
     end
   end
 end
@@ -802,13 +834,13 @@ def render_debug(args)
     "args.lowrez.mouse_position is:  #{args.lowrez.mouse_position.x}, #{args.lowrez.mouse_position.y}",
     # "args.lowrez.mouse_down tick:    #{args.state.last_click || "never"}",
     # "args.lowrez.mouse_up tick:      #{args.state.last_up || "false"}",
-    # "pixel position in map mx, my:   #{32 + args.state.pacman.mx}, #{31 + args.state.pacman.my}",
+    "pacman position in map mx, my:   #{32 + args.state.pacman.mx}, #{31 + args.state.pacman.my}",
     "grid position grid_x, grid_y:   #{args.state.pacman.grid_x}, #{args.state.pacman.grid_y}",
     # "pacman coors on screen x, y:    #{args.state.pacman[:x] + args.state.offset[args.state.pacman.dir].x}, #{args.state.pacman[:y] + args.state.offset[args.state.pacman.dir].y}",
     # "maze status at grid coors:      #{args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x]}",
     # "red ghost map pos mx, my:       #{32 + args.state.red_ghost.mx}, #{31 + args.state.red_ghost.my}",
-    # "red ghost grid grid_x, grid_y:  #{args.state.red_ghost.grid_x}, #{args.state.red_ghost.grid_y}",
-    # "red ghost screen coors x, y:    #{args.state.red_ghost[:x]}, #{args.state.red_ghost[:y]}",
+    "red ghost grid grid_x, grid_y:  #{args.state.red_ghost.grid_x}, #{args.state.red_ghost.grid_y}",
+    "red ghost world coors x, y:    #{args.state.red_ghost[:x]}, #{args.state.red_ghost[:y]}",
     # "args.state.map_origin ox, oy:    #{args.state.map_origin_x}, #{args.state.map_origin_y}",
     "red ghost is hovering over:     #{args.state.maze[args.state.red_ghost.grid_y][args.state.red_ghost.grid_x]}",
     "red ghost in a maze corner:     #{args.state.red_ghost_in_a_corner}",
@@ -817,7 +849,8 @@ def render_debug(args)
     "red ghost is allowed right:     #{args.state.red_ghost.allowed_right}",
     "red ghost is allowed down:      #{args.state.red_ghost.allowed_down}",
     "red ghost is allowed left:      #{args.state.red_ghost.allowed_left}",
-    # "red ghost is direction:         #{args.state.red_ghost.dir}"
+    "red ghost is direction:         #{args.state.red_ghost.dir}",
+    "red ghost is in mode:           #{args.state.red_ghost.mode}"
   ]
 
   args.outputs.debug << args.state

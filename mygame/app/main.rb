@@ -299,7 +299,7 @@ def move_blinky(args)
   end
 
   # stall ghost slightly in a corner, helps a tiny bit ;)
-  if args.state.blinky_in_a_corner == :yes && args.state.blinky.skip_frame == :true
+  if args.state.blinky_in_a_corner == :yes && args.state.blinky.skip_frame == :true && args.state.blinky.pen == :no
     args.state.blinky.skip_frame = :false
     return
   end
@@ -540,8 +540,6 @@ def move_pinky(args)
       args.state.pinky.x -= 1 if (move_x == 0) && (((args.state.pinky.x - 1) % 4) != 0)
   end
 
-  # args.state.pinky.mx += move_x
-  # args.state.pinky.my += move_y
   args.state.pinky.x += move_x
   args.state.pinky.y += move_y
 
@@ -564,7 +562,7 @@ def move_pinky(args)
   end
 
   # stall ghost slightly in a corner, helps a tiny bit ;)
-  if args.state.pinky_in_a_corner == :yes && args.state.pinky.skip_frame == :true
+  if args.state.pinky_in_a_corner == :yes && args.state.pinky.skip_frame == :true && args.state.pinky.pen == :no
     args.state.pinky.skip_frame = :false
     return
   end
@@ -1140,6 +1138,7 @@ end
 
 def render_debug(args)
   grid_highlight args
+  grid_highlight_pinky args
   grid_highlight_blinky args
   # this is the point to determine which part of the grid red ghost is in
   args.lowrez.primitives << {
@@ -1224,7 +1223,6 @@ def render_debug(args)
     # "blinky is direction:         #{args.state.blinky.dir}",
     # "blinky is in mode:           #{args.state.blinky.mode}",
     "pinky world coors x, y:    #{args.state.pinky[:x]}, #{args.state.pinky[:y]}",
-    "pinky map pos mx, my:      #{32 + args.state.pinky.mx}, #{31 + args.state.pinky.my}",
     # "args.state.map_origin ox, oy:    #{args.state.map_origin_x}, #{args.state.map_origin_y}",
     "pinky is hovering over:     #{args.state.maze[args.state.pinky.grid_y][args.state.pinky.grid_x]}",
     "pinky in a maze corner:     #{args.state.pinky_in_a_corner}",
@@ -1234,7 +1232,8 @@ def render_debug(args)
     "pinky is allowed down:      #{args.state.pinky.allowed_down}",
     "pinky is allowed left:      #{args.state.pinky.allowed_left}",
     "pinky is direction:         #{args.state.pinky.dir}",
-    "pinky is in mode:           #{args.state.pinky.mode}"
+    "pinky is in mode:           #{args.state.pinky.mode}",
+    "pinky is in playpen:        #{args.state.pinky.pen}"
   ]
 
   args.outputs.debug << args.state

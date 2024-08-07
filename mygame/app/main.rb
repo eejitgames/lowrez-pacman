@@ -124,7 +124,26 @@ def init(args)
     mode: :chase, # mode either chase or scatter
     speed: 10,
     skip_frame: :true,
-    entered_pen_time: 0
+    entered_pen_time: 120
+  }
+
+  args.state.clyde = {
+    x: 67 - 6 ,
+    y: 78,
+    home_x: 4, # grid coors, home corner when scatter mode
+    home_y: 35,
+    target_x: 15,
+    target_y: 25,
+    grid_x: 16 - 1,
+    grid_y: 19,
+    move_x: 0,
+    move_y: 0,
+    dir: 4,
+    pen: :yes,
+    mode: :chase, # mode either chase or scatter
+    speed: 10,
+    skip_frame: :true,
+    entered_pen_time: 240
   }
 
   # to position pacman sprite correctly
@@ -145,6 +164,7 @@ def tick(args)
   draw_pinky args
   draw_inky args
   draw_blinky args
+  draw_clyde args
   draw_lives args
   draw_pacman args
   check_pacman_hit_status args
@@ -156,7 +176,14 @@ def tick(args)
   move_blinky args if Kernel.tick_count.zmod? args.state.blinky.speed
   move_pinky args if Kernel.tick_count.zmod? args.state.pinky.speed
   move_inky args if Kernel.tick_count.zmod? args.state.inky.speed
+  move_clyde args if Kernel.tick_count.zmod? args.state.clyde.speed
   exit_ghost_pen args
+  check_ghosts args
+end
+
+def check_ghosts
+  # sometimes ghosts are drawn right over each other
+
 end
 
 def exit_ghost_pen(args)
@@ -210,6 +237,23 @@ def exit_ghost_pen(args)
     args.state.inky.dir = 4
     args.state.inky.pen = :no
   end
+
+  # clyde
+  if ((args.state.clyde.pen ==:yes) && (args.state.clyde.entered_pen_time.elapsed_time > 60 * 12)) # 12 seconds
+    args.state.clyde.speed = 2
+    args.state.clyde.mode = :ghost_exit
+    args.state.clyde.skip_frame = :true
+   end
+
+  if ((args.state.clyde.mode == :ghost_exit) && (args.state.clyde.x == 65))
+    args.state.clyde.dir = 1
+  end
+
+  if ((args.state.clyde.mode == :ghost_exit) && (args.state.clyde.y == 90))
+    args.state.clyde.mode = :chase
+    args.state.clyde.dir = 4
+    args.state.clyde.pen = :no
+  end
 end
 
 def check_pacman_hit_status(args)
@@ -242,6 +286,16 @@ def check_pacman_hit_status(args)
     args.state.inky.target_y = 22
     args.state.inky.speed = 1
   end
+
+  # check if hit clyde
+  if args.state.pacman.grid_x == args.state.clyde.grid_x && args.state.pacman.grid_y == args.state.clyde.grid_y && args.state.clyde.mode == :scatter
+    args.state.pacman.score += args.state.pacman.ghost_score
+    args.state.pacman.ghost_score *= 2
+    args.state.clyde.mode = :eyes
+    args.state.clyde.target_x = 16
+    args.state.clyde.target_y = 22
+    args.state.clyde.speed = 1
+  end
 end
 
 def ghost_mode(args)
@@ -261,6 +315,11 @@ def ghost_mode(args)
     # inky
     args.state.inky.speed = 2 unless args.state.inky.pen == :yes
     args.state.inky.mode = :chase unless args.state.inky.pen == :yes
+    args.state.pacman.ghost_score = 200
+
+    # clyde
+    args.state.clyde.speed = 2 unless args.state.clyde.pen == :yes
+    args.state.clyde.mode = :chase unless args.state.clyde.pen == :yes
     args.state.pacman.ghost_score = 200
   end
 end
@@ -1110,6 +1169,269 @@ def move_inky(args)
   end
 end
 
+def move_clyde(args)
+  # move routine for when ghost is outside the pen only
+  # return unless args.state.clyde.pen == :no
+
+  #set target square to where pacman is
+  if args.state.clyde.mode == :chase
+    args.state.clyde.target_x = args.state.pacman.grid_x
+    args.state.clyde.target_y = args.state.pacman.grid_y
+  end
+
+  move_x = args.state.clyde.move_x
+  move_y = args.state.clyde.move_y
+  point_x = args.state.clyde.x
+  point_y = args.state.clyde.y
+
+  # try to move forward
+  case args.state.clyde[:dir]
+    when 1
+      if (((args.state.clyde.x - 1) % 4) == 0) && ((args.state.maze[(point_y / 4).floor + 1][(point_x / 4).floor]) < 9) ||
+         ((args.state.maze[(point_y / 4).floor + 1][(point_x / 4).floor] < 11) && (args.state.clyde.mode == :ghost_exit))
+        move_x = 0
+        move_y = 1
+      else
+        move_x = 0
+        move_y = 0
+      end
+      args.state.clyde.y += 1 if (move_y == 0) && (((args.state.clyde.y - 2) % 4) != 0)
+    when 2
+      if (((args.state.clyde.y + 2) % 4) == 0) && ((args.state.maze[(point_y / 4).floor][(point_x / 4).floor + 1]) < 9)
+        move_x = 1
+        move_y = 0
+      else
+        move_x = 0
+        move_y = 0
+      end
+        args.state.clyde.x += 1 if (move_x == 0) && (((args.state.clyde.x - 1) % 4) != 0)
+    when 3
+      if (((args.state.clyde.x - 1) % 4) == 0) && ((args.state.maze[(point_y / 4).floor - 1][(point_x / 4).floor]) < 9)
+        move_x = 0
+        move_y = -1
+      else
+        move_x = 0
+        move_y = 0
+      end
+        args.state.clyde.y -= 1 if (move_y == 0) && (((args.state.clyde.y - 2) % 4) != 0)
+    when 4
+      if (((args.state.clyde.y + 2) % 4) == 0) && ((args.state.maze[(point_y / 4).floor][(point_x / 4).floor - 1]) < 9)
+        move_x = -1
+        move_y = 0
+      else
+        move_x = 0
+        move_y = 0
+      end
+      args.state.clyde.x -= 1 if (move_x == 0) && (((args.state.clyde.x - 1) % 4) != 0)
+  end
+
+  args.state.clyde.x += move_x
+  args.state.clyde.y += move_y
+
+  point_to_grid_clyde args, args.state.clyde.x, args.state.clyde.y
+
+  # Ok we have moved, check if we are in a corner or at a junction where a turn decision/change of direction happens
+  # 1 is an oridinary dot
+  # 2 is a power pill
+  # 3 is a junction, with a dot
+  # 4 is a junction, without a dot
+  # 5 is a corner, with a dot
+  # 6 is a corner, without a dot
+
+  args.state.clyde_in_a_corner = :no
+  args.state.clyde_in_a_junction = :no
+  clyde_over = args.state.maze[args.state.clyde.grid_y][args.state.clyde.grid_x]
+
+  if (clyde_over == 5 || clyde_over == 6 || clyde_over == 7) && (((args.state.clyde.x - 1 ) % 4) == 0) && (((args.state.clyde.y - 2 ) % 4) == 0)
+    args.state.clyde_in_a_corner = :yes
+  end
+
+  # stall ghost slightly in a corner, helps a tiny bit ;)
+  if args.state.clyde_in_a_corner == :yes && args.state.clyde.skip_frame == :true && args.state.clyde.pen == :no
+    args.state.clyde.skip_frame = :false
+    return
+  end
+
+  if (clyde_over == 3 || clyde_over == 4) && (((args.state.clyde.x - 1 ) % 4) == 0) && (((args.state.clyde.y - 2 ) % 4) == 0)
+    args.state.clyde_in_a_junction = :yes
+  end
+
+  allowed_up = :no
+  allowed_right = :no
+  allowed_down = :no
+  allowed_left = :no
+  if args.state.clyde_in_a_corner == :yes || args.state.clyde_in_a_junction == :yes
+    # we are at a corner or junction, capture the grid coordinates of the four possible options
+    grid_up_x    = args.state.clyde.grid_x
+    grid_up_y    = args.state.clyde.grid_y + 1
+
+    grid_right_x = args.state.clyde.grid_x + 1
+    grid_right_y = args.state.clyde.grid_y
+
+    grid_down_x  = args.state.clyde.grid_x
+    grid_down_y  = args.state.clyde.grid_y - 1
+
+    grid_left_x  = args.state.clyde.grid_x - 1
+    grid_left_y  = args.state.clyde.grid_y
+
+    # check which directions are available including backwards (only allowed when in scatter mode)
+    # 1 up, 2 right, 3 down, 4 left
+    allowed_up = :no
+    allowed_right = :no
+    allowed_down = :no
+    allowed_left = :no
+
+    # check the grid north, south, east, and west of current position, also update points to check
+    points_to_check = {}
+    if args.state.maze[grid_up_y][grid_up_x] < 9
+      allowed_up    = :yes
+      points_to_check[:up] = [grid_up_x, grid_up_y]
+    elsif ((args.state.maze[grid_up_y][grid_up_x] < 11) && (args.state.clyde.mode == :ghost_exit))
+      allowed_up    = :yes
+      points_to_check[:up] = [grid_up_x, grid_up_y]
+    end
+    if args.state.maze[grid_right_y][grid_right_x] < 9
+      allowed_right = :yes
+      points_to_check[:right] = [grid_right_x, grid_right_y]
+    end
+    if args.state.maze[grid_down_y][grid_down_x] < 9
+      allowed_down  = :yes
+      points_to_check[:down] = [grid_down_x, grid_down_y]
+    end
+    if args.state.maze[grid_left_y][grid_left_x] < 9
+      allowed_left  = :yes
+      points_to_check[:left] = [grid_left_x, grid_left_y]
+    end
+
+    # for a corner loop over the directions skipping the current dir and it's opposite
+    if args.state.clyde_in_a_corner == :yes
+      case args.state.clyde.dir
+        when 1
+        # if going up, check left and right
+          args.state.clyde.dir = 2 if allowed_right == :yes
+          args.state.clyde.dir = 4 if allowed_left == :yes
+        when 2
+          # if going right, check up and down
+          args.state.clyde.dir = 1 if allowed_up == :yes
+          args.state.clyde.dir = 3 if allowed_down == :yes
+          args.state.clyde.dir = 4 if ((allowed_left == :yes) && (args.state.clyde.pen == :yes))
+        when 3
+          # if going down, check left and right
+          args.state.clyde.dir = 2 if allowed_right == :yes
+          args.state.clyde.dir = 4 if allowed_left == :yes
+        when 4
+          # if going left, check up and down
+          args.state.clyde.dir = 1 if allowed_up == :yes
+          args.state.clyde.dir = 3 if allowed_down == :yes
+          args.state.clyde.dir = 2 if ((allowed_right == :yes) && (args.state.clyde.pen == :yes))
+      end
+    end
+
+    # for a junction loop over the directions optionally skipping the opposite
+    # To break a tie, the ghost prefers directions in this order: up, left, down, right
+    if args.state.clyde_in_a_junction == :yes
+    # this sets a default in the case there is a tie in the distance
+      case args.state.clyde.dir
+        when 1 # up
+        # if going up, check left, right and up
+          args.state.clyde.dir = 2 if allowed_right == :yes
+          # args.state.clyde.dir = 3 if (allowed_down == :yes && args.state.clyde.mode == :scatter)
+          args.state.clyde.dir = 4 if allowed_left == :yes
+          args.state.clyde.dir = 1 if allowed_up == :yes
+          points_to_check.delete(:down) # unless args.state.clyde.mode == :scatter
+        when 2 # right
+          # if going right, check up, down, and right
+          args.state.clyde.dir = 2 if allowed_right == :yes
+          args.state.clyde.dir = 3 if allowed_down == :yes
+          # args.state.clyde.dir = 4 if (allowed_left == :yes && args.state.clyde.mode == :scatter)
+          args.state.clyde.dir = 1 if allowed_up == :yes
+          points_to_check.delete(:left) # unless args.state.clyde.mode == :scatter
+        when 3 # down
+          # if going down, check left, right, and down
+          args.state.clyde.dir = 2 if allowed_right == :yes
+          args.state.clyde.dir = 3 if allowed_down == :yes
+          args.state.clyde.dir = 4 if allowed_left == :yes
+          # args.state.clyde.dir = 1 if (allowed_up == :yes && args.state.clyde.mode == :scatter)
+          points_to_check.delete(:up) # unless args.state.clyde.mode == :scatter
+        when 4 # left
+          # if going left, check up, down and left
+          # args.state.clyde.dir = 2 if (allowed_right == :yes && args.state.clyde.mode == :scatter)
+          args.state.clyde.dir = 3 if allowed_down == :yes
+          args.state.clyde.dir = 4 if allowed_left == :yes
+          args.state.clyde.dir = 1 if allowed_up == :yes
+          points_to_check.delete(:right) # unless args.state.clyde.mode == :scatter
+      end
+
+      # check if we have a shortest distance to target without a tie
+      distances = {}
+
+      if args.state.clyde.mode == :scatter
+        target_x = args.state.clyde.home_x
+        target_y = args.state.clyde.home_y
+      else
+        target_x = args.state.clyde.target_x
+        target_y = args.state.clyde.target_y
+      end
+
+      points_to_check.each do |key, coord|
+        distances[key] = distance(target_x, target_y, coord[0], coord[1])
+      end
+
+      # Sort the distances by value
+      sorted_distances = distances.sort_by { |_, dist| dist }
+
+      # Get the smallest distance
+      min_distance = sorted_distances[0][1]
+
+      # Find all points with the smallest distance
+      closest_points = sorted_distances.select { |_, dist| dist == min_distance }
+
+      # Print results based on the number of closest points
+      if closest_points.size > 1
+        # putz "There is a tie between the closest points:"
+        # putz "Using default dir from above"
+      else
+        closest_point = closest_points.first[0]
+        coord = points_to_check[closest_point]
+        # putz "The closest point to the target (#{target_x}, #{target_y}) is #{closest_point}: (#{coord[0]}, #{coord[1]})"
+        # 1 up, 2 right, 3 down, 4 left
+        case closest_point
+          when :up
+            args.state.clyde.dir = 1
+          when :right
+            args.state.clyde.dir = 2
+          when :down
+            args.state.clyde.dir = 3
+          when :left
+            args.state.clyde.dir = 4
+        end
+      end
+    end
+    args.state.clyde.skip_frame = :true
+  end
+  args.state.clyde.allowed_up = allowed_up
+  args.state.clyde.allowed_right = allowed_right
+  args.state.clyde.allowed_down = allowed_down
+  args.state.clyde.allowed_left = allowed_left
+
+  if args.state.clyde.mode == :eyes
+    # ghost is just above the pen, put him in it
+    if ((args.state.clyde.grid_x == 16) && (args.state.clyde.grid_y == 22))
+      args.state.clyde.speed = 10
+      args.state.clyde.pen = :yes
+      args.state.clyde.mode = :chase
+      args.state.clyde.dir = 4
+      args.state.clyde.x = 67
+      args.state.clyde.y = 78
+      args.state.clyde.grid_x = 16
+      args.state.clyde.grid_y = 19
+      args.state.clyde.entered_pen_time = Kernel.tick_count
+      args.state.clyde.target_x = 15 # a square north of the pen exit
+      args.state.clyde.target_y = 25
+    end
+  end
+end
+
 def draw_dots(args)
   # rectangle_height = 29
   # rectangle_width = 26
@@ -1299,6 +1621,29 @@ def grid_highlight_inky(args)
   }
 end
 
+def grid_highlight_clyde(args)
+  grid_size = 4 # each grid cell is 4x4 pixels
+
+  grid_x = args.state.clyde.grid_x
+  grid_y = args.state.clyde.grid_y
+
+  # Calculate the screen coordinates for the highlighted grid cell
+  x = grid_x * grid_size
+  y = grid_y * grid_size
+
+  args.lowrez.primitives << {
+    x: (0 - args.state.pacman.mx) + x,
+    y: (0 - args.state.pacman.my) + y,
+    w: grid_size,
+    h: grid_size,
+    r: 0,
+    g: 255,
+    b: 0,
+    a: 128,
+    path: :pixel
+  }
+end
+
 def point_to_grid(args, point_x, point_y)
   # determine which grid section a point is in
   size_x = 4 # 136 / 34
@@ -1334,6 +1679,15 @@ def point_to_grid_inky(args, point_x, point_y)
 
   args.state.inky.grid_x = (point_x / size_x).floor
   args.state.inky.grid_y = (point_y / size_y).floor
+end
+
+def point_to_grid_clyde(args, point_x, point_y)
+  # determine which grid section a point is in
+  size_x = 4 # 136 / 34
+  size_y = 4 # 148 / 37
+
+  args.state.clyde.grid_x = (point_x / size_x).floor
+  args.state.clyde.grid_y = (point_y / size_y).floor
 end
 
 # 1 up, 2 right, 3 down, 4 left (0 for stationary until a key is pressed)
@@ -1418,6 +1772,10 @@ def player_input(args)
       # inky
       args.state.inky.speed = 8 unless args.state.inky.pen == :yes
       args.state.inky.mode = :scatter unless args.state.inky.pen == :yes
+
+      # clyde
+      args.state.clyde.speed = 8 unless args.state.clyde.pen == :yes
+      args.state.clyde.mode = :scatter unless args.state.clyde.pen == :yes
     when 7
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
       args.state.pacman.score += 50
@@ -1434,6 +1792,11 @@ def player_input(args)
       # inky
       args.state.inky.speed = 8 unless args.state.inky.pen == :yes
       args.state.inky.mode = :scatter unless args.state.inky.pen == :yes
+
+
+      # clyde
+      args.state.clyde.speed = 8 unless args.state.clyde.pen == :yes
+      args.state.clyde.mode = :scatter unless args.state.clyde.pen == :yes
   end
 
   args.state.pacman.move_x = move_x
@@ -1488,6 +1851,22 @@ def draw_inky(args)
   args.lowrez.primitives << {
     x: (0 - args.state.pacman.mx + 1) + args.state.inky.x,
     y: (0 - args.state.pacman.my) + args.state.inky.y,
+    w: 8,
+    h: 8,
+    path: sprite_path,
+    anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
+    anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
+    angle: 0
+  }
+end
+
+def draw_clyde(args)
+  sprite_path  = "sprites/clyde-#{args.state.clyde.dir}.png"
+  sprite_path  = "sprites/ghost-flee.png" if args.state.clyde.mode == :scatter
+  sprite_path  = "sprites/ghost-eyes-#{args.state.clyde.dir}.png" if args.state.clyde.mode == :eyes
+  args.lowrez.primitives << {
+    x: (0 - args.state.pacman.mx + 1) + args.state.clyde.x,
+    y: (0 - args.state.pacman.my) + args.state.clyde.y,
     w: 8,
     h: 8,
     path: sprite_path,
@@ -1558,6 +1937,7 @@ def render_debug(args)
   grid_highlight args
   grid_highlight_pinky args
   grid_highlight_blinky args
+  grid_highlight_clyde args
   # this is the point to determine which part of the grid red ghost is in
   args.lowrez.primitives << {
     x: (0 - args.state.pacman.mx) + args.state.blinky.x,

@@ -71,10 +71,10 @@ def init(args)
   }
 
   args.state.blinky = {
-    x: 67,
+    x: 67, # world coords
     y: 90,
-    mx: 35,
-    my: 79,
+    # mx: 35, # not used
+    # my: 79,
     home_x: 28, # grid coors, home corner when scatter mode
     home_y: 37,
     target_x: 16,
@@ -93,21 +93,21 @@ def init(args)
 
   args.state.pinky = {
     x: 67,
-    y: 90,
-    mx: 35,
-    my: 79,
+    y: 78,
+    # mx: 35, # not used
+    # my: 79,
     home_x: 5, # grid coors, home corner when scatter mode
     home_y: 37,
-    target_x: 16,
-    target_y: 10,
+    target_x: 15,
+    target_y: 25,
     grid_x: 16,
-    grid_y: 22,
+    grid_y: 19,
     move_x: 0,
     move_y: 0,
     dir: 4,
-    pen: :no,
+    pen: :yes,
     mode: :chase, # mode either chase or scatter
-    speed: 2,
+    speed: 10,
     skip_frame: :true,
     entered_pen_time: 0
   }
@@ -127,8 +127,8 @@ def tick(args)
   draw_maze args
   draw_dots args
   draw_score args
-  draw_blinky args
   draw_pinky args
+  draw_blinky args
   draw_lives args
   draw_pacman args
   check_pacman_hit_status args
@@ -138,11 +138,12 @@ def tick(args)
   ghost_mode args
   return if args.state.pacman.dir == 0 # pacman has not moved yet, the game has not started
   move_blinky args if Kernel.tick_count.zmod? args.state.blinky.speed
+  move_pinky args if Kernel.tick_count.zmod? args.state.pinky.speed
   exit_ghost_pen args
 end
 
 def exit_ghost_pen(args)
-  # Use Numeric#elapsed_time to determine how long it's been
+  # blinky
   if ((args.state.blinky.pen ==:yes) && (args.state.blinky.entered_pen_time.elapsed_time > 60 * 12)) # 12 seconds
     args.state.blinky.speed = 2
     args.state.blinky.mode = :ghost_exit
@@ -158,10 +159,27 @@ def exit_ghost_pen(args)
     args.state.blinky.dir = 4
     args.state.blinky.pen = :no
   end
+
+  #pinky
+  if ((args.state.pinky.pen ==:yes) && (args.state.pinky.entered_pen_time.elapsed_time > 60 * 12)) # 12 seconds
+    args.state.pinky.speed = 2
+    args.state.pinky.mode = :ghost_exit
+    args.state.pinky.skip_frame = :true
+   end
+
+  if ((args.state.pinky.mode == :ghost_exit) && (args.state.pinky.x == 65))
+    args.state.pinky.dir = 1
+  end
+
+  if ((args.state.pinky.mode == :ghost_exit) && (args.state.pinky.y == 90))
+    args.state.pinky.mode = :chase
+    args.state.pinky.dir = 4
+    args.state.pinky.pen = :no
+  end
 end
 
 def check_pacman_hit_status(args)
-  # check if hit red ghost
+  # check if hit blinky
   if args.state.pacman.grid_x == args.state.blinky.grid_x && args.state.pacman.grid_y == args.state.blinky.grid_y && args.state.blinky.mode == :scatter
     args.state.pacman.score += args.state.pacman.ghost_score
     args.state.pacman.ghost_score *= 2
@@ -170,13 +188,29 @@ def check_pacman_hit_status(args)
     args.state.blinky.target_y = 22
     args.state.blinky.speed = 1
   end
+
+  # check if hit pinky
+  if args.state.pacman.grid_x == args.state.pinky.grid_x && args.state.pacman.grid_y == args.state.pinky.grid_y && args.state.pinky.mode == :scatter
+    args.state.pacman.score += args.state.pacman.ghost_score
+    args.state.pacman.ghost_score *= 2
+    args.state.pinky.mode = :eyes
+    args.state.pinky.target_x = 16
+    args.state.pinky.target_y = 22
+    args.state.pinky.speed = 1
+  end
 end
 
 def ghost_mode(args)
   # Use Numeric#elapsed_time to determine how long it's been
   if args.state.pacman.powered_up.elapsed_time > 60 * 9 # 9 seconds
+    # blinky
     args.state.blinky.speed = 2 unless args.state.blinky.pen == :yes
     args.state.blinky.mode = :chase unless args.state.blinky.pen == :yes
+    args.state.pacman.ghost_score = 200
+
+    # pinky
+    args.state.pinky.speed = 2 unless args.state.pinky.pen == :yes
+    args.state.pinky.mode = :chase unless args.state.pinky.pen == :yes
     args.state.pacman.ghost_score = 200
   end
 end
@@ -241,8 +275,8 @@ def move_blinky(args)
       args.state.blinky.x -= 1 if (move_x == 0) && (((args.state.blinky.x - 1) % 4) != 0)
   end
 
-  args.state.blinky.mx += move_x
-  args.state.blinky.my += move_y
+  # args.state.blinky.mx += move_x
+  # args.state.blinky.my += move_y
   args.state.blinky.x += move_x
   args.state.blinky.y += move_y
 
@@ -450,6 +484,271 @@ def move_blinky(args)
   end
 end
 
+def move_pinky(args)
+  # move routine for when ghost is outside the pen only
+  # return unless args.state.pinky.pen == :no
+
+  #set target square to where pacman is
+  if args.state.pinky.mode == :chase
+    args.state.pinky.target_x = args.state.pacman.grid_x
+    args.state.pinky.target_y = args.state.pacman.grid_y
+  end
+
+  move_x = args.state.pinky.move_x
+  move_y = args.state.pinky.move_y
+  point_x = args.state.pinky.x
+  point_y = args.state.pinky.y
+
+  # try to move forward
+  case args.state.pinky[:dir]
+    when 1
+      if (((args.state.pinky.x - 1) % 4) == 0) && ((args.state.maze[(point_y / 4).floor + 1][(point_x / 4).floor]) < 9) ||
+         ((args.state.maze[(point_y / 4).floor + 1][(point_x / 4).floor] < 11) && (args.state.pinky.mode == :ghost_exit))
+        move_x = 0
+        move_y = 1
+      else
+        move_x = 0
+        move_y = 0
+      end
+      args.state.pinky.y += 1 if (move_y == 0) && (((args.state.pinky.y - 2) % 4) != 0)
+    when 2
+      if (((args.state.pinky.y + 2) % 4) == 0) && ((args.state.maze[(point_y / 4).floor][(point_x / 4).floor + 1]) < 9)
+        move_x = 1
+        move_y = 0
+      else
+        move_x = 0
+        move_y = 0
+      end
+        args.state.pinky.x += 1 if (move_x == 0) && (((args.state.pinky.x - 1) % 4) != 0)
+    when 3
+      if (((args.state.pinky.x - 1) % 4) == 0) && ((args.state.maze[(point_y / 4).floor - 1][(point_x / 4).floor]) < 9)
+        move_x = 0
+        move_y = -1
+      else
+        move_x = 0
+        move_y = 0
+      end
+        args.state.pinky.y -= 1 if (move_y == 0) && (((args.state.pinky.y - 2) % 4) != 0)
+    when 4
+      if (((args.state.pinky.y + 2) % 4) == 0) && ((args.state.maze[(point_y / 4).floor][(point_x / 4).floor - 1]) < 9)
+        move_x = -1
+        move_y = 0
+      else
+        move_x = 0
+        move_y = 0
+      end
+      args.state.pinky.x -= 1 if (move_x == 0) && (((args.state.pinky.x - 1) % 4) != 0)
+  end
+
+  # args.state.pinky.mx += move_x
+  # args.state.pinky.my += move_y
+  args.state.pinky.x += move_x
+  args.state.pinky.y += move_y
+
+  point_to_grid_pinky args, args.state.pinky.x, args.state.pinky.y
+
+  # Ok we have moved, check if we are in a corner or at a junction where a turn decision/change of direction happens
+  # 1 is an oridinary dot
+  # 2 is a power pill
+  # 3 is a junction, with a dot
+  # 4 is a junction, without a dot
+  # 5 is a corner, with a dot
+  # 6 is a corner, without a dot
+
+  args.state.pinky_in_a_corner = :no
+  args.state.pinky_in_a_junction = :no
+  pinky_over = args.state.maze[args.state.pinky.grid_y][args.state.pinky.grid_x]
+
+  if (pinky_over == 5 || pinky_over == 6 || pinky_over == 7) && (((args.state.pinky.x - 1 ) % 4) == 0) && (((args.state.pinky.y - 2 ) % 4) == 0)
+    args.state.pinky_in_a_corner = :yes
+  end
+
+  # stall ghost slightly in a corner, helps a tiny bit ;)
+  if args.state.pinky_in_a_corner == :yes && args.state.pinky.skip_frame == :true
+    args.state.pinky.skip_frame = :false
+    return
+  end
+
+  if (pinky_over == 3 || pinky_over == 4) && (((args.state.pinky.x - 1 ) % 4) == 0) && (((args.state.pinky.y - 2 ) % 4) == 0)
+    args.state.pinky_in_a_junction = :yes
+  end
+
+  allowed_up = :no
+  allowed_right = :no
+  allowed_down = :no
+  allowed_left = :no
+  if args.state.pinky_in_a_corner == :yes || args.state.pinky_in_a_junction == :yes
+    # we are at a corner or junction, capture the grid coordinates of the four possible options
+    grid_up_x    = args.state.pinky.grid_x
+    grid_up_y    = args.state.pinky.grid_y + 1
+
+    grid_right_x = args.state.pinky.grid_x + 1
+    grid_right_y = args.state.pinky.grid_y
+
+    grid_down_x  = args.state.pinky.grid_x
+    grid_down_y  = args.state.pinky.grid_y - 1
+
+    grid_left_x  = args.state.pinky.grid_x - 1
+    grid_left_y  = args.state.pinky.grid_y
+
+    # check which directions are available including backwards (only allowed when in scatter mode)
+    # 1 up, 2 right, 3 down, 4 left
+    allowed_up = :no
+    allowed_right = :no
+    allowed_down = :no
+    allowed_left = :no
+
+    # check the grid north, south, east, and west of current position, also update points to check
+    points_to_check = {}
+    if args.state.maze[grid_up_y][grid_up_x] < 9
+      allowed_up    = :yes
+      points_to_check[:up] = [grid_up_x, grid_up_y]
+    elsif ((args.state.maze[grid_up_y][grid_up_x] < 11) && (args.state.pinky.mode == :ghost_exit))
+      allowed_up    = :yes
+      points_to_check[:up] = [grid_up_x, grid_up_y]
+    end
+    if args.state.maze[grid_right_y][grid_right_x] < 9
+      allowed_right = :yes
+      points_to_check[:right] = [grid_right_x, grid_right_y]
+    end
+    if args.state.maze[grid_down_y][grid_down_x] < 9
+      allowed_down  = :yes
+      points_to_check[:down] = [grid_down_x, grid_down_y]
+    end
+    if args.state.maze[grid_left_y][grid_left_x] < 9
+      allowed_left  = :yes
+      points_to_check[:left] = [grid_left_x, grid_left_y]
+    end
+
+    # for a corner loop over the directions skipping the current dir and it's opposite
+    if args.state.pinky_in_a_corner == :yes
+      case args.state.pinky.dir
+        when 1
+        # if going up, check left and right
+          args.state.pinky.dir = 2 if allowed_right == :yes
+          args.state.pinky.dir = 4 if allowed_left == :yes
+        when 2
+          # if going right, check up and down
+          args.state.pinky.dir = 1 if allowed_up == :yes
+          args.state.pinky.dir = 3 if allowed_down == :yes
+          args.state.pinky.dir = 4 if ((allowed_left == :yes) && (args.state.pinky.pen == :yes))
+        when 3
+          # if going down, check left and right
+          args.state.pinky.dir = 2 if allowed_right == :yes
+          args.state.pinky.dir = 4 if allowed_left == :yes
+        when 4
+          # if going left, check up and down
+          args.state.pinky.dir = 1 if allowed_up == :yes
+          args.state.pinky.dir = 3 if allowed_down == :yes
+          args.state.pinky.dir = 2 if ((allowed_right == :yes) && (args.state.pinky.pen == :yes))
+      end
+    end
+
+    # for a junction loop over the directions optionally skipping the opposite
+    # To break a tie, the ghost prefers directions in this order: up, left, down, right
+    if args.state.pinky_in_a_junction == :yes
+    # this sets a default in the case there is a tie in the distance
+      case args.state.pinky.dir
+        when 1 # up
+        # if going up, check left, right and up
+          args.state.pinky.dir = 2 if allowed_right == :yes
+          # args.state.pinky.dir = 3 if (allowed_down == :yes && args.state.pinky.mode == :scatter)
+          args.state.pinky.dir = 4 if allowed_left == :yes
+          args.state.pinky.dir = 1 if allowed_up == :yes
+          points_to_check.delete(:down) # unless args.state.pinky.mode == :scatter
+        when 2 # right
+          # if going right, check up, down, and right
+          args.state.pinky.dir = 2 if allowed_right == :yes
+          args.state.pinky.dir = 3 if allowed_down == :yes
+          # args.state.pinky.dir = 4 if (allowed_left == :yes && args.state.pinky.mode == :scatter)
+          args.state.pinky.dir = 1 if allowed_up == :yes
+          points_to_check.delete(:left) # unless args.state.pinky.mode == :scatter
+        when 3 # down
+          # if going down, check left, right, and down
+          args.state.pinky.dir = 2 if allowed_right == :yes
+          args.state.pinky.dir = 3 if allowed_down == :yes
+          args.state.pinky.dir = 4 if allowed_left == :yes
+          # args.state.pinky.dir = 1 if (allowed_up == :yes && args.state.pinky.mode == :scatter)
+          points_to_check.delete(:up) # unless args.state.pinky.mode == :scatter
+        when 4 # left
+          # if going left, check up, down and left
+          # args.state.pinky.dir = 2 if (allowed_right == :yes && args.state.pinky.mode == :scatter)
+          args.state.pinky.dir = 3 if allowed_down == :yes
+          args.state.pinky.dir = 4 if allowed_left == :yes
+          args.state.pinky.dir = 1 if allowed_up == :yes
+          points_to_check.delete(:right) # unless args.state.pinky.mode == :scatter
+      end
+
+      # check if we have a shortest distance to target without a tie
+      distances = {}
+
+      if args.state.pinky.mode == :scatter
+        target_x = args.state.pinky.home_x
+        target_y = args.state.pinky.home_y
+      else
+        target_x = args.state.pinky.target_x
+        target_y = args.state.pinky.target_y
+      end
+
+      points_to_check.each do |key, coord|
+        distances[key] = distance(target_x, target_y, coord[0], coord[1])
+      end
+
+      # Sort the distances by value
+      sorted_distances = distances.sort_by { |_, dist| dist }
+
+      # Get the smallest distance
+      min_distance = sorted_distances[0][1]
+
+      # Find all points with the smallest distance
+      closest_points = sorted_distances.select { |_, dist| dist == min_distance }
+
+      # Print results based on the number of closest points
+      if closest_points.size > 1
+        # putz "There is a tie between the closest points:"
+        # putz "Using default dir from above"
+      else
+        closest_point = closest_points.first[0]
+        coord = points_to_check[closest_point]
+        # putz "The closest point to the target (#{target_x}, #{target_y}) is #{closest_point}: (#{coord[0]}, #{coord[1]})"
+        # 1 up, 2 right, 3 down, 4 left
+        case closest_point
+          when :up
+            args.state.pinky.dir = 1
+          when :right
+            args.state.pinky.dir = 2
+          when :down
+            args.state.pinky.dir = 3
+          when :left
+            args.state.pinky.dir = 4
+        end
+      end
+    end
+    args.state.pinky.skip_frame = :true
+  end
+  args.state.pinky.allowed_up = allowed_up
+  args.state.pinky.allowed_right = allowed_right
+  args.state.pinky.allowed_down = allowed_down
+  args.state.pinky.allowed_left = allowed_left
+
+  if args.state.pinky.mode == :eyes
+    # ghost is just above the pen, put him in it
+    if ((args.state.pinky.grid_x == 16) && (args.state.pinky.grid_y == 22))
+      args.state.pinky.speed = 10
+      args.state.pinky.pen = :yes
+      args.state.pinky.mode = :chase
+      args.state.pinky.dir = 4
+      args.state.pinky.x = 67
+      args.state.pinky.y = 78
+      args.state.pinky.grid_x = 16
+      args.state.pinky.grid_y = 19
+      args.state.pinky.entered_pen_time = Kernel.tick_count
+      args.state.pinky.target_x = 15 # a square north of the pen exit
+      args.state.pinky.target_y = 25
+    end
+  end
+end
+
 def draw_dots(args)
   # rectangle_height = 29
   # rectangle_width = 26
@@ -593,6 +892,29 @@ def grid_highlight_blinky(args)
   }
 end
 
+def grid_highlight_pinky(args)
+  grid_size = 4 # each grid cell is 4x4 pixels
+
+  grid_x = args.state.pinky.grid_x
+  grid_y = args.state.pinky.grid_y
+
+  # Calculate the screen coordinates for the highlighted grid cell
+  x = grid_x * grid_size
+  y = grid_y * grid_size
+
+  args.lowrez.primitives << {
+    x: (0 - args.state.pacman.mx) + x,
+    y: (0 - args.state.pacman.my) + y,
+    w: grid_size,
+    h: grid_size,
+    r: 0,
+    g: 255,
+    b: 0,
+    a: 128,
+    path: :pixel
+  }
+end
+
 def point_to_grid(args, point_x, point_y)
   # determine which grid section a point is in
   size_x = 4 # 136 / 34
@@ -611,6 +933,16 @@ def point_to_grid_blinky(args, point_x, point_y)
   args.state.blinky.grid_x = (point_x / size_x).floor
   args.state.blinky.grid_y = (point_y / size_y).floor
 end
+
+def point_to_grid_pinky(args, point_x, point_y)
+  # determine which grid section a point is in
+  size_x = 4 # 136 / 34
+  size_y = 4 # 148 / 37
+
+  args.state.pinky.grid_x = (point_x / size_x).floor
+  args.state.pinky.grid_y = (point_y / size_y).floor
+end
+
 
 # 1 up, 2 right, 3 down, 4 left (0 for stationary until a key is pressed)
 def player_input(args)
@@ -682,22 +1014,34 @@ def player_input(args)
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
       args.state.pacman.score += 50
       args.state.pacman.powered_up = Kernel.tick_count
+
+      # blinky
       args.state.blinky.speed = 8 unless args.state.blinky.pen == :yes
       args.state.blinky.mode = :scatter unless args.state.blinky.pen == :yes
+
+      # pinky
+      args.state.pinky.speed = 8 unless args.state.pinky.pen == :yes
+      args.state.pinky.mode = :scatter unless args.state.pinky.pen == :yes
     when 7
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
       args.state.pacman.score += 50
       args.state.pacman.powered_up = Kernel.tick_count
+
+      # blinky
       args.state.blinky.speed = 8 unless args.state.blinky.pen == :yes
       args.state.blinky.mode = :scatter unless args.state.blinky.pen == :yes
+
+      # pinky
+      args.state.pinky.speed = 8 unless args.state.pinky.pen == :yes
+      args.state.pinky.mode = :scatter unless args.state.pinky.pen == :yes
   end
 
   args.state.pacman.move_x = move_x
   args.state.pacman.move_y = move_y
   args.state.pacman.mx += move_x
   args.state.pacman.my += move_y
-  args.state.blinky.mx += move_x
-  args.state.blinky.my += move_y
+  # args.state.blinky.mx += move_x
+  # args.state.blinky.my += move_y
 
   # args.state.map_origin_x = 32 + args.state.pacman.mx
   # args.state.map_origin_y = 31 + args.state.pacman.my

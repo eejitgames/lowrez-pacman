@@ -91,6 +91,27 @@ def init(args)
     entered_pen_time: 0
   }
 
+  args.state.pinky = {
+    x: 67,
+    y: 90,
+    mx: 35,
+    my: 79,
+    home_x: 5, # grid coors, home corner when scatter mode
+    home_y: 37,
+    target_x: 16,
+    target_y: 10,
+    grid_x: 16,
+    grid_y: 22,
+    move_x: 0,
+    move_y: 0,
+    dir: 4,
+    pen: :no,
+    mode: :chase, # mode either chase or scatter
+    speed: 2,
+    skip_frame: :true,
+    entered_pen_time: 0
+  }
+
   # to position pacman sprite correctly
   args.state.offset[0] = { x: 0, y: 1 }
   args.state.offset[1] = { x: 1, y: 1 }
@@ -107,6 +128,7 @@ def tick(args)
   draw_dots args
   draw_score args
   draw_blinky args
+  draw_pinky args
   draw_lives args
   draw_pacman args
   check_pacman_hit_status args
@@ -699,6 +721,22 @@ def draw_blinky(args)
   }
 end
 
+def draw_pinky(args)
+  sprite_path  = "sprites/pinky-#{args.state.pinky.dir}.png"
+  sprite_path  = "sprites/ghost-flee.png" if args.state.pinky.mode == :scatter
+  sprite_path  = "sprites/ghost-eyes-#{args.state.pinky.dir}.png" if args.state.pinky.mode == :eyes
+  args.lowrez.primitives << {
+    x: (0 - args.state.pacman.mx + 1) + args.state.pinky.x,
+    y: (0 - args.state.pacman.my) + args.state.pinky.y,
+    w: 8,
+    h: 8,
+    path: sprite_path,
+    anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
+    anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
+    angle: 0
+  }
+end
+
 def draw_pacman(args)
   start_animation_on_tick = 1
 
@@ -746,10 +784,10 @@ def game_has_lost_focus?
 
   if current_focus != $gtk.args.state.lost_focus
     if current_focus
-      puts "lost focus"
+      # putz "lost focus"
       # audio[:music].paused = true
     else
-      puts "gained focus"
+      # putz "gained focus"
       # audio[:music].paused = false
     end
   end
@@ -828,19 +866,31 @@ def render_debug(args)
     "grid position grid_x, grid_y:   #{args.state.pacman.grid_x}, #{args.state.pacman.grid_y}",
     # "pacman coors on screen x, y:    #{args.state.pacman[:x] + args.state.offset[args.state.pacman.dir].x}, #{args.state.pacman[:y] + args.state.offset[args.state.pacman.dir].y}",
     # "maze status at grid coors:      #{args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x]}",
-    # "red ghost map pos mx, my:       #{32 + args.state.blinky.mx}, #{31 + args.state.blinky.my}",
-    "red ghost grid grid_x, grid_y:  #{args.state.blinky.grid_x}, #{args.state.blinky.grid_y}",
-    "red ghost world coors x, y:    #{args.state.blinky[:x]}, #{args.state.blinky[:y]}",
+    # "blinky map pos mx, my:       #{32 + args.state.blinky.mx}, #{31 + args.state.blinky.my}",
+    # "blinky grid grid_x, grid_y:  #{args.state.blinky.grid_x}, #{args.state.blinky.grid_y}",
+    # "blinky world coors x, y:    #{args.state.blinky[:x]}, #{args.state.blinky[:y]}",
     # "args.state.map_origin ox, oy:    #{args.state.map_origin_x}, #{args.state.map_origin_y}",
-    "red ghost is hovering over:     #{args.state.maze[args.state.blinky.grid_y][args.state.blinky.grid_x]}",
-    "red ghost in a maze corner:     #{args.state.blinky_in_a_corner}",
-    "red ghost in a maze junction:   #{args.state.blinky_in_a_junction}",
-    "red ghost is allowed up:        #{args.state.blinky.allowed_up}",
-    "red ghost is allowed right:     #{args.state.blinky.allowed_right}",
-    "red ghost is allowed down:      #{args.state.blinky.allowed_down}",
-    "red ghost is allowed left:      #{args.state.blinky.allowed_left}",
-    "red ghost is direction:         #{args.state.blinky.dir}",
-    "red ghost is in mode:           #{args.state.blinky.mode}"
+    # "blinky is hovering over:     #{args.state.maze[args.state.blinky.grid_y][args.state.blinky.grid_x]}",
+    # "blinky in a maze corner:     #{args.state.blinky_in_a_corner}",
+    # "blinky in a maze junction:   #{args.state.blinky_in_a_junction}",
+    # "blinky is allowed up:        #{args.state.blinky.allowed_up}",
+    # "blinky is allowed right:     #{args.state.blinky.allowed_right}",
+    # "blinky is allowed down:      #{args.state.blinky.allowed_down}",
+    # "blinky is allowed left:      #{args.state.blinky.allowed_left}",
+    # "blinky is direction:         #{args.state.blinky.dir}",
+    # "blinky is in mode:           #{args.state.blinky.mode}",
+    "pinky world coors x, y:    #{args.state.pinky[:x]}, #{args.state.pinky[:y]}",
+    "pinky map pos mx, my:      #{32 + args.state.pinky.mx}, #{31 + args.state.pinky.my}",
+    # "args.state.map_origin ox, oy:    #{args.state.map_origin_x}, #{args.state.map_origin_y}",
+    "pinky is hovering over:     #{args.state.maze[args.state.pinky.grid_y][args.state.pinky.grid_x]}",
+    "pinky in a maze corner:     #{args.state.pinky_in_a_corner}",
+    "pinky in a maze junction:   #{args.state.pinky_in_a_junction}",
+    "pinky is allowed up:        #{args.state.pinky.allowed_up}",
+    "pinky is allowed right:     #{args.state.pinky.allowed_right}",
+    "pinky is allowed down:      #{args.state.pinky.allowed_down}",
+    "pinky is allowed left:      #{args.state.pinky.allowed_left}",
+    "pinky is direction:         #{args.state.pinky.dir}",
+    "pinky is in mode:           #{args.state.pinky.mode}"
   ]
 
   args.outputs.debug << args.state

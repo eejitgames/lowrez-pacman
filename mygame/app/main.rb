@@ -181,8 +181,43 @@ def tick(args)
   check_ghosts args
 end
 
-def check_ghosts
+def check_ghosts(args)
   # sometimes ghosts are drawn right over each other
+  # blinky, pinky, inky and clyde
+  # Define the pairs
+  x1, y1 = 1, 2
+  x2, y2 = 3, 4
+  x3, y3 = 5, 6
+  x4, y4 = 1, 2
+
+  # Put the pairs in an array
+  pairs = {
+    blinky: [args.state.blinky.x, args.state.blinky.y],
+    pinky: [args.state.pinky.x, args.state.pinky.y],
+    inky: [args.state.inky.x, args.state.inky.y],
+    clyde: [args.state.clyde.x, args.state.clyde.y]
+  }
+  # Create a hash to store the pairs and their corresponding keys
+  pair_values = Hash.new { |hash, key| hash[key] = [] }
+
+  # Populate the pair_values hash
+  pairs.each do |key, value|
+    pair_values[value] << key
+  end
+
+  # Find all pairs with more than one key (i.e., duplicate pairs)
+  duplicates = pair_values.select { |_, keys| keys.size > 1 }
+
+  if duplicates.empty?
+    # putz "All pairs are unique."
+  else
+    putz "Duplicate pairs found:"
+    duplicates.each do |pair, keys|
+      putz "Pair (#{pair[0]}, #{pair[1]}) is shared by: #{keys.join(', ')}"
+    end
+  end
+
+  # if they are not in the pen, one of them needs to skip a frame
 
 end
 

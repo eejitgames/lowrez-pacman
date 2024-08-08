@@ -95,10 +95,10 @@ def init(args)
     skip_frame: :true,
     entered_pen_time: 0,
     offset: [
-      [0,  0],  # no offset
-      [0,  2],  # 2 tiles up
-      [2, 0],  # 2 tiles right
-      [0, -2],  # 2 tiles down
+      [0,   0],  # no offset
+      [0,   2],  # 2 tiles up
+      [2,   0],  # 2 tiles right
+      [0,  -2],  # 2 tiles down
       [-2,  0]   # 2 tiles left
     ]
   }
@@ -431,8 +431,6 @@ def move_blinky(args)
       args.state.blinky.x -= 1 if (move_x == 0) && (((args.state.blinky.x - 1) % 4) != 0)
   end
 
-  # args.state.blinky.mx += move_x
-  # args.state.blinky.my += move_y
   args.state.blinky.x += move_x
   args.state.blinky.y += move_y
 
@@ -644,15 +642,7 @@ def move_pinky(args)
   # move routine for when ghost is outside the pen only
   # return unless args.state.pinky.pen == :no
 
-  #set target square to where pacman is
-  #if args.state.pinky.mode == :chase
-  #  args.state.pinky.target_x = args.state.pacman.grid_x
-  #  args.state.pinky.target_y = args.state.pacman.grid_y
-  #end
-  
   if args.state.pinky.mode == :chase
-    #tx = args.state.pacman.grid_x
-    #ty = args.state.pacman.grid_y
     # set target square offset four tiles away from pacman in the direction pacman is currently moving
     case args.state.pacman.dir
       # up
@@ -675,10 +665,6 @@ def move_pinky(args)
         tx = args.state.pacman.grid_x - 4
         ty = args.state.pacman.grid_y
     end
-
-  #tx.cap_min_max(4, 29)
-  #ty.cap_min_max(4, 32)
-  # if args.state.pinky.mode == :chase
     args.state.pinky.target_x = tx
     args.state.pinky.target_y = ty
   end

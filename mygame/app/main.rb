@@ -92,7 +92,7 @@ def init(args)
   args.state.pinky = {
     x: 67,
     y: 78,
-    home_x: 5, # grid coors, home corner when scatter mode
+    home_x: 4, # grid coors, home corner when scatter mode
     home_y: 37,
     target_x: 15,
     target_y: 25,
@@ -111,8 +111,8 @@ def init(args)
   args.state.inky = {
     x: 67 + 6,
     y: 78,
-    home_x: 4, # grid coors, home corner when scatter mode
-    home_y: 35,
+    home_x: 30, # grid coors, home corner when scatter mode
+    home_y: 2,
     target_x: 15,
     target_y: 25,
     grid_x: 16 + 2,
@@ -130,8 +130,8 @@ def init(args)
   args.state.clyde = {
     x: 67 - 6 ,
     y: 78,
-    home_x: 4, # grid coors, home corner when scatter mode
-    home_y: 35,
+    home_x: 2, # grid coors, home corner when scatter mode
+    home_y: 2,
     target_x: 15,
     target_y: 25,
     grid_x: 16 - 1,
@@ -1991,6 +1991,7 @@ end
 
 def render_debug(args)
   grid_highlight args
+  grid_highlight_inky args
   grid_highlight_pinky args
   grid_highlight_blinky args
   grid_highlight_clyde args

@@ -67,7 +67,14 @@ def init(args)
     frame: 0,
     powered_up: 0,
     speed: 2,
-    ghost_score: 200
+    ghost_score: 200,
+    offset: [
+      { x: 0, y: 1 },
+      { x: 1, y: 1 },
+      { x: 1, y: 0 },
+      { x: 0, y: 0 },
+      { x: 0, y: 1 }
+    ]
   }
 
   args.state.blinky = {
@@ -86,7 +93,14 @@ def init(args)
     mode: :chase, # mode either chase or scatter
     speed: 2,
     skip_frame: :true,
-    entered_pen_time: 0
+    entered_pen_time: 0,
+    offset: [
+      [0,  0],  # no offset
+      [0,  2],  # 2 tiles up
+      [2, 0],  # 2 tiles right
+      [0, -2],  # 2 tiles down
+      [-2,  0]   # 2 tiles left
+    ]
   }
 
   args.state.pinky = {
@@ -145,13 +159,6 @@ def init(args)
     skip_frame: :true,
     entered_pen_time: 240
   }
-
-  # to position pacman sprite correctly
-  args.state.offset[0] = { x: 0, y: 1 }
-  args.state.offset[1] = { x: 1, y: 1 }
-  args.state.offset[2] = { x: 1, y: 0 }
-  args.state.offset[3] = { x: 0, y: 0 }
-  args.state.offset[4] = { x: 0, y: 1 }
 end
 
 def tick(args)
@@ -2098,8 +2105,8 @@ def draw_pacman(args)
   if sprite_index
     sprite_path  = "sprites/lowrez-pac-#{sprite_index}.png"
     args.lowrez.primitives << {
-      x: args.state.pacman[:x] + args.state.offset[args.state.pacman.dir].x,
-      y: args.state.pacman[:y] + args.state.offset[args.state.pacman.dir].y,
+      x: args.state.pacman[:x] + args.state.pacman.offset[args.state.pacman.dir].x,
+      y: args.state.pacman[:y] + args.state.pacman.offset[args.state.pacman.dir].y,
       w: 8,
       h: 8,
       path: sprite_path,
@@ -2215,7 +2222,7 @@ def render_debug(args)
     # "args.lowrez.mouse_up tick:      #{args.state.last_up || "false"}",
     "pacman position in map mx, my:   #{32 + args.state.pacman.mx}, #{31 + args.state.pacman.my}",
     "grid position grid_x, grid_y:   #{args.state.pacman.grid_x}, #{args.state.pacman.grid_y}",
-    # "pacman coors on screen x, y:    #{args.state.pacman[:x] + args.state.offset[args.state.pacman.dir].x}, #{args.state.pacman[:y] + args.state.offset[args.state.pacman.dir].y}",
+    # "pacman coors on screen x, y:    #{args.state.pacman[:x] + args.state.pacman.offset[args.state.pacman.dir].x}, #{args.state.pacman[:y] + args.state.pacman.offset[args.state.pacman.dir].y}",
     # "maze status at grid coors:      #{args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x]}",
     # "blinky map pos mx, my:       #{32 + args.state.blinky.mx}, #{31 + args.state.blinky.my}",
     # "blinky grid grid_x, grid_y:  #{args.state.blinky.grid_x}, #{args.state.blinky.grid_y}",

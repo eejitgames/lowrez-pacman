@@ -1247,10 +1247,26 @@ def move_clyde(args)
   # move routine for when ghost is outside the pen only
   # return unless args.state.clyde.pen == :no
 
+  # During chase mode, Clyde's targeting logic changes based on his proximity to Pac-Man.
+  # He first calculates the Euclidean distance between his tile and Pac-Man's tile.
+  # If the distance between them is eight tiles or more, Clyde targets Pac-Man directly just as Blinky does.
+  # If the distance between them is less than eight tiles, however, Clyde switches his target to the tile he normally
+  # uses during scatter mode and heads for his corner until he gets far enough away to start targeting Pac-Man again
+
+  # calc the distance from clyde to pacman
+  # putz "distance: #{distance(args.state.clyde.grid_x, args.state.clyde.grid_y, args.state.pacman.grid_x, args.state.pacman.grid_y)}"
+
   #set target square to where pacman is
   if args.state.clyde.mode == :chase
-    args.state.clyde.target_x = args.state.pacman.grid_x
-    args.state.clyde.target_y = args.state.pacman.grid_y
+    if distance(args.state.clyde.grid_x, args.state.clyde.grid_y, args.state.pacman.grid_x, args.state.pacman.grid_y) > 65
+      # puts60 "chase"
+      args.state.clyde.target_x = args.state.pacman.grid_x
+      args.state.clyde.target_y = args.state.pacman.grid_y
+    else
+      # puts60 "flee"
+      args.state.clyde.target_x = args.state.clyde.home_x
+      args.state.clyde.target_y = args.state.clyde.home_y
+    end
   end
 
   move_x = args.state.clyde.move_x

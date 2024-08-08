@@ -178,7 +178,7 @@ def tick(args)
   move_inky args if Kernel.tick_count.zmod? args.state.inky.speed
   move_clyde args if Kernel.tick_count.zmod? args.state.clyde.speed
   exit_ghost_pen args
-  check_ghosts args
+  # check_ghosts args # this may not be needed when they have different logic
 end
 
 def check_ghosts(args)
@@ -216,14 +216,12 @@ def check_ghosts(args)
       putz "Pair (#{pair[0]}, #{pair[1]}) is shared by: #{keys.join(', ')}"
     end
   end
-
   # if they are not in the pen, one of them needs to skip a frame
-
 end
 
 def exit_ghost_pen(args)
   # blinky
-  if ((args.state.blinky.pen ==:yes) && (args.state.blinky.entered_pen_time.elapsed_time > 60 * 12)) # 12 seconds
+  if ((args.state.blinky.pen ==:yes) && (args.state.blinky.entered_pen_time.elapsed_time > 60 * 9)) # 9 seconds
     args.state.blinky.speed = 2
     args.state.blinky.mode = :ghost_exit
     args.state.blinky.skip_frame = :true
@@ -240,7 +238,7 @@ def exit_ghost_pen(args)
   end
 
   # pinky
-  if ((args.state.pinky.pen ==:yes) && (args.state.pinky.entered_pen_time.elapsed_time > 60 * 12)) # 12 seconds
+  if ((args.state.pinky.pen ==:yes) && (args.state.pinky.entered_pen_time.elapsed_time > 60 * 9)) # 9 seconds
     args.state.pinky.speed = 2
     args.state.pinky.mode = :ghost_exit
     args.state.pinky.skip_frame = :true
@@ -257,7 +255,7 @@ def exit_ghost_pen(args)
   end
 
   # inky
-  if ((args.state.inky.pen ==:yes) && (args.state.inky.entered_pen_time.elapsed_time > 60 * 12)) # 12 seconds
+  if ((args.state.inky.pen ==:yes) && (args.state.inky.entered_pen_time.elapsed_time > 60 * 9)) # 9 seconds
     args.state.inky.speed = 2
     args.state.inky.mode = :ghost_exit
     args.state.inky.skip_frame = :true
@@ -274,7 +272,7 @@ def exit_ghost_pen(args)
   end
 
   # clyde
-  if ((args.state.clyde.pen ==:yes) && (args.state.clyde.entered_pen_time.elapsed_time > 60 * 12)) # 12 seconds
+  if ((args.state.clyde.pen ==:yes) && (args.state.clyde.entered_pen_time.elapsed_time > 60 * 9)) # 9 seconds
     args.state.clyde.speed = 2
     args.state.clyde.mode = :ghost_exit
     args.state.clyde.skip_frame = :true
@@ -337,25 +335,32 @@ def ghost_mode(args)
   # Use Numeric#elapsed_time to determine how long it's been
   if args.state.pacman.powered_up.elapsed_time > 60 * 9 # 9 seconds
     # blinky
-    args.state.blinky.speed = 2 unless args.state.blinky.pen == :yes
-    args.state.blinky.mode = :chase unless args.state.blinky.pen == :yes
-    args.state.pacman.ghost_score = 200
+    unless args.state.blinky.pen == :yes || args.state.blinky.mode == :eyes
+      args.state.blinky.speed = 2
+      args.state.blinky.mode = :chase
+      args.state.pacman.ghost_score = 200
+    end
 
     # pinky
-    args.state.pinky.speed = 2 unless args.state.pinky.pen == :yes
-    args.state.pinky.mode = :chase unless args.state.pinky.pen == :yes
-    args.state.pacman.ghost_score = 200
-
+    unless args.state.pinky.pen == :yes || args.state.pinky.mode == :eyes
+      args.state.pinky.speed = 2
+      args.state.pinky.mode = :chase
+      args.state.pacman.ghost_score = 200
+    end
 
     # inky
-    args.state.inky.speed = 2 unless args.state.inky.pen == :yes
-    args.state.inky.mode = :chase unless args.state.inky.pen == :yes
-    args.state.pacman.ghost_score = 200
+    unless args.state.inky.pen == :yes || args.state.inky.mode == :eyes
+      args.state.inky.speed = 2
+      args.state.inky.mode = :chase
+      args.state.pacman.ghost_score = 200
+    end
 
     # clyde
-    args.state.clyde.speed = 2 unless args.state.clyde.pen == :yes
-    args.state.clyde.mode = :chase unless args.state.clyde.pen == :yes
-    args.state.pacman.ghost_score = 200
+    unless args.state.clyde.pen == :yes || args.state.clyde.mode == :eyes
+      args.state.clyde.speed = 2
+      args.state.clyde.mode = :chase
+      args.state.pacman.ghost_score = 200
+    end
   end
 end
 
@@ -1549,7 +1554,6 @@ def draw_score(args)
 end
 
 def draw_ready(args)
-  return
   args.lowrez.labels  << {
     x: 34,
     y: 57,
@@ -1562,6 +1566,9 @@ def draw_ready(args)
     a: 255,
     font: LOWREZ_FONT_PATH
   }
+  args.state.pinky.entered_pen_time = Kernel.tick_count
+  args.state.inky.entered_pen_time = Kernel.tick_count + 120
+  args.state.clyde.entered_pen_time = Kernel.tick_count + 240
 end
 
 def grid_highlight(args)
@@ -1781,6 +1788,7 @@ def player_input(args)
     move_y = 0
   end
 
+  # update grid with new value when eating dots
   case args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x]
     when 1
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
@@ -1797,49 +1805,62 @@ def player_input(args)
       args.state.pacman.powered_up = Kernel.tick_count
 
       # blinky
-      args.state.blinky.speed = 8 unless args.state.blinky.pen == :yes
-      args.state.blinky.mode = :scatter unless args.state.blinky.pen == :yes
+      unless args.state.blinky.mode ==:eyes || args.state.blinky.pen == :yes
+        args.state.blinky.speed = 8
+        args.state.blinky.mode = :scatter
+      end
 
       # pinky
-      args.state.pinky.speed = 8 unless args.state.pinky.pen == :yes
-      args.state.pinky.mode = :scatter unless args.state.pinky.pen == :yes
+      unless args.state.pinky.mode ==:eyes || args.state.pinky.pen == :yes
+        args.state.pinky.speed = 8
+        args.state.pinky.mode = :scatter
+      end
 
       # inky
-      args.state.inky.speed = 8 unless args.state.inky.pen == :yes
-      args.state.inky.mode = :scatter unless args.state.inky.pen == :yes
+      unless args.state.inky.mode ==:eyes || args.state.inky.pen == :yes
+        args.state.inky.speed = 8
+        args.state.inky.mode = :scatter
+      end
 
       # clyde
-      args.state.clyde.speed = 8 unless args.state.clyde.pen == :yes
-      args.state.clyde.mode = :scatter unless args.state.clyde.pen == :yes
+      unless args.state.clyde.mode ==:eyes || args.state.clyde.pen == :yes
+        args.state.clyde.speed = 8
+        args.state.clyde.mode = :scatter
+      end
     when 7
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
       args.state.pacman.score += 50
       args.state.pacman.powered_up = Kernel.tick_count
 
       # blinky
-      args.state.blinky.speed = 8 unless args.state.blinky.pen == :yes
-      args.state.blinky.mode = :scatter unless args.state.blinky.pen == :yes
+      unless args.state.blinky.mode ==:eyes || args.state.blinky.pen == :yes
+        args.state.blinky.speed = 8
+        args.state.blinky.mode = :scatter
+      end
 
       # pinky
-      args.state.pinky.speed = 8 unless args.state.pinky.pen == :yes
-      args.state.pinky.mode = :scatter unless args.state.pinky.pen == :yes
+      unless args.state.pinky.mode ==:eyes || args.state.pinky.pen == :yes
+        args.state.pinky.speed = 8
+        args.state.pinky.mode = :scatter
+      end
 
       # inky
-      args.state.inky.speed = 8 unless args.state.inky.pen == :yes
-      args.state.inky.mode = :scatter unless args.state.inky.pen == :yes
-
+      unless args.state.inky.mode ==:eyes || args.state.inky.pen == :yes
+        args.state.inky.speed = 8
+        args.state.inky.mode = :scatter
+      end
 
       # clyde
-      args.state.clyde.speed = 8 unless args.state.clyde.pen == :yes
-      args.state.clyde.mode = :scatter unless args.state.clyde.pen == :yes
+      unless args.state.clyde.mode ==:eyes || args.state.clyde.pen == :yes
+        args.state.clyde.speed = 8
+        args.state.clyde.mode = :scatter
+      end
   end
 
   args.state.pacman.move_x = move_x
   args.state.pacman.move_y = move_y
   args.state.pacman.mx += move_x
   args.state.pacman.my += move_y
-  # args.state.blinky.mx += move_x
-  # args.state.blinky.my += move_y
 
   # args.state.map_origin_x = 32 + args.state.pacman.mx
   # args.state.map_origin_y = 31 + args.state.pacman.my

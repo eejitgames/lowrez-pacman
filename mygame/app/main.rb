@@ -646,29 +646,29 @@ def move_pinky(args)
   if args.state.pinky.mode == :chase
     #tx = args.state.pacman.grid_x
     #ty = args.state.pacman.grid_y
-    # set target square  offset four tiles away from pacman in the direction pacman is currently moving
+    # set target square offset four tiles away from pacman in the direction pacman is currently moving
     case args.state.pacman.dir
       # up
       when 1
         tx = args.state.pacman.grid_x
         ty = args.state.pacman.grid_y + 4
-      
+
       # right
       when 2
         tx = args.state.pacman.grid_x + 4
         ty = args.state.pacman.grid_y
-    
+
       # down
       when 3
         tx = args.state.pacman.grid_x
         ty = args.state.pacman.grid_y - 4
-    
+
       # left
       when 4
         tx = args.state.pacman.grid_x - 4
         ty = args.state.pacman.grid_y
     end
-  
+
   #tx.cap_min_max(4, 29)
   #ty.cap_min_max(4, 32)
   # if args.state.pinky.mode == :chase
@@ -676,7 +676,6 @@ def move_pinky(args)
     args.state.pinky.target_y = ty
   end
 
-  
   move_x = args.state.pinky.move_x
   move_y = args.state.pinky.move_y
   point_x = args.state.pinky.x
@@ -984,11 +983,90 @@ def move_inky(args)
   # move routine for when ghost is outside the pen only
   # return unless args.state.inky.pen == :no
 
+  # e needs Pac-Man's current tile/orientation and Blinky's current tile to calculate his final target
+  # To determine Inky's target, we must first establish an intermediate offset two tiles in front of Pac-Man in the direction
+  # he is moving. Now imagine drawing a vector from the center of the red ghost's current tile to the center of the offset tile,
+  # then double the vector length by extending it out just as far again beyond the offset tile.
+
+=begin
+# Constants for directions
+DIRECTION_OFFSETS = {
+  up:    [0, -2],  # 2 tiles up
+  down:  [0,  2],  # 2 tiles down
+  left:  [-2, 0],  # 2 tiles left
+  right: [2,  0]   # 2 tiles right
+}
+
+# Inputs (Pac-Man's position and direction, Blinky's position)
+pac_x, pac_y = 10, 10
+pac_dir = :right  # Can be :up, :down, :left, or :right
+
+blinky_x, blinky_y = 8, 8
+
+# Step 1: Calculate the intermediate offset tile (2 tiles ahead of Pac-Man)
+offset_x, offset_y = DIRECTION_OFFSETS[pac_dir]
+intermediate_x = pac_x + offset_x
+intermediate_y = pac_y + offset_y
+
+# Step 2: Calculate the vector from Blinky to the intermediate tile
+vector_x = intermediate_x - blinky_x
+vector_y = intermediate_y - blinky_y
+
+# Step 3: Double the vector to get Inky's target
+inky_target_x = intermediate_x + vector_x
+inky_target_y = intermediate_y + vector_y
+
+# Output Inky's target position
+puts "Inky's target position is (#{inky_target_x}, #{inky_target_y})"
+
+=end
+
   #set target square to where pacman is
   if args.state.inky.mode == :chase
     args.state.inky.target_x = args.state.pacman.grid_x
     args.state.inky.target_y = args.state.pacman.grid_y
   end
+
+=begin
+  if args.state.pinky.mode == :chase
+    #tx = args.state.pacman.grid_x
+    #ty = args.state.pacman.grid_y
+    # set target square offset four tiles away from pacman in the direction pacman is currently moving
+    case args.state.pacman.dir
+      # up
+      when 1
+        tx = args.state.pacman.grid_x
+        ty = args.state.pacman.grid_y + 4
+
+      # right
+      when 2
+        tx = args.state.pacman.grid_x + 4
+        ty = args.state.pacman.grid_y
+
+      # down
+      when 3
+        tx = args.state.pacman.grid_x
+        ty = args.state.pacman.grid_y - 4
+
+      # left
+      when 4
+        tx = args.state.pacman.grid_x - 4
+        ty = args.state.pacman.grid_y
+    end
+
+  #tx.cap_min_max(4, 29)
+  #ty.cap_min_max(4, 32)
+  # if args.state.pinky.mode == :chase
+    args.state.pinky.target_x = tx
+    args.state.pinky.target_y = ty
+  end
+
+  move_x = args.state.pinky.move_x
+  move_y = args.state.pinky.move_y
+  point_x = args.state.pinky.x
+  point_y = args.state.pinky.y
+
+=end
 
   move_x = args.state.inky.move_x
   move_y = args.state.inky.move_y

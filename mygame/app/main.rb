@@ -638,11 +638,45 @@ def move_pinky(args)
   # return unless args.state.pinky.pen == :no
 
   #set target square to where pacman is
+  #if args.state.pinky.mode == :chase
+  #  args.state.pinky.target_x = args.state.pacman.grid_x
+  #  args.state.pinky.target_y = args.state.pacman.grid_y
+  #end
+  
   if args.state.pinky.mode == :chase
-    args.state.pinky.target_x = args.state.pacman.grid_x
-    args.state.pinky.target_y = args.state.pacman.grid_y
+    #tx = args.state.pacman.grid_x
+    #ty = args.state.pacman.grid_y
+    # set target square  offset four tiles away from pacman in the direction pacman is currently moving
+    case args.state.pacman.dir
+      # up
+      when 1
+        tx = args.state.pacman.grid_x
+        ty = args.state.pacman.grid_y + 4
+      
+      # right
+      when 2
+        tx = args.state.pacman.grid_x + 4
+        ty = args.state.pacman.grid_y
+    
+      # down
+      when 3
+        tx = args.state.pacman.grid_x
+        ty = args.state.pacman.grid_y - 4
+    
+      # left
+      when 4
+        tx = args.state.pacman.grid_x - 4
+        ty = args.state.pacman.grid_y
+    end
+  
+  #tx.cap_min_max(4, 29)
+  #ty.cap_min_max(4, 32)
+  # if args.state.pinky.mode == :chase
+    args.state.pinky.target_x = tx
+    args.state.pinky.target_y = ty
   end
 
+  
   move_x = args.state.pinky.move_x
   move_y = args.state.pinky.move_y
   point_x = args.state.pinky.x
@@ -1594,6 +1628,29 @@ def grid_highlight(args)
   }
 end
 
+def target_highlight_pinky(args)
+  grid_size = 4 # each grid cell is 4x4 pixels
+
+  grid_x = args.state.pinky.target_x
+  grid_y = args.state.pinky.target_y
+
+  # Calculate the screen coordinates for the highlighted grid cell
+  x = grid_x * grid_size
+  y = grid_y * grid_size
+
+  args.lowrez.primitives << {
+    x: (0 - args.state.pacman.mx) + x,
+    y: (0 - args.state.pacman.my) + y,
+    w: grid_size,
+    h: grid_size,
+    r: 0,
+    g: 255,
+    b: 0,
+    a: 128,
+    path: :pixel
+  }
+end
+
 def grid_highlight_blinky(args)
   grid_size = 4 # each grid cell is 4x4 pixels
 
@@ -1995,6 +2052,8 @@ def render_debug(args)
   grid_highlight_pinky args
   grid_highlight_blinky args
   grid_highlight_clyde args
+  target_highlight_pinky args
+  
   # this is the point to determine which part of the grid red ghost is in
   args.lowrez.primitives << {
     x: (0 - args.state.pacman.mx) + args.state.blinky.x,

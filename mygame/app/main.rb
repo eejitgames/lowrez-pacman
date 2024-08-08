@@ -1707,20 +1707,18 @@ def draw_ready(args)
 end
 
 def grid_highlight(args)
-  grid_size = 4 # each grid cell is 4x4 pixels
-
   grid_x = args.state.pacman.grid_x
   grid_y = args.state.pacman.grid_y
 
   # Calculate the screen coordinates for the highlighted grid cell
-  x = grid_x * grid_size - args.state.pacman.mx
-  y = grid_y * grid_size - args.state.pacman.my
+  x = grid_x * 4 - args.state.pacman.mx
+  y = grid_y * 4 - args.state.pacman.my
 
   args.lowrez.primitives << {
     x: x,
     y: y,
-    w: grid_size,
-    h: grid_size,
+    w: 4,
+    h: 4,
     r: 255,
     g: 0,
     b: 0,
@@ -1730,20 +1728,18 @@ def grid_highlight(args)
 end
 
 def target_highlight_pinky(args)
-  grid_size = 4 # each grid cell is 4x4 pixels
-
   grid_x = args.state.pinky.target_x
   grid_y = args.state.pinky.target_y
 
   # Calculate the screen coordinates for the highlighted grid cell
-  x = grid_x * grid_size
-  y = grid_y * grid_size
+  x = grid_x * 4
+  y = grid_y * 4
 
   args.lowrez.primitives << {
     x: (0 - args.state.pacman.mx) + x,
     y: (0 - args.state.pacman.my) + y,
-    w: grid_size,
-    h: grid_size,
+    w: 4,
+    h: 4,
     r: 0,
     g: 255,
     b: 0,
@@ -1753,20 +1749,18 @@ def target_highlight_pinky(args)
 end
 
 def grid_highlight_blinky(args)
-  grid_size = 4 # each grid cell is 4x4 pixels
-
   grid_x = args.state.blinky.grid_x
   grid_y = args.state.blinky.grid_y
 
   # Calculate the screen coordinates for the highlighted grid cell
-  x = grid_x * grid_size
-  y = grid_y * grid_size
+  x = grid_x * 4
+  y = grid_y * 4
 
   args.lowrez.primitives << {
     x: (0 - args.state.pacman.mx) + x,
     y: (0 - args.state.pacman.my) + y,
-    w: grid_size,
-    h: grid_size,
+    w: 4,
+    h: 4,
     r: 0,
     g: 255,
     b: 0,
@@ -1776,20 +1770,18 @@ def grid_highlight_blinky(args)
 end
 
 def grid_highlight_pinky(args)
-  grid_size = 4 # each grid cell is 4x4 pixels
-
   grid_x = args.state.pinky.grid_x
   grid_y = args.state.pinky.grid_y
 
   # Calculate the screen coordinates for the highlighted grid cell
-  x = grid_x * grid_size
-  y = grid_y * grid_size
+  x = grid_x * 4
+  y = grid_y * 4
 
   args.lowrez.primitives << {
     x: (0 - args.state.pacman.mx) + x,
     y: (0 - args.state.pacman.my) + y,
-    w: grid_size,
-    h: grid_size,
+    w: 4,
+    h: 4,
     r: 0,
     g: 255,
     b: 0,
@@ -1799,20 +1791,18 @@ def grid_highlight_pinky(args)
 end
 
 def grid_highlight_inky(args)
-  grid_size = 4 # each grid cell is 4x4 pixels
-
   grid_x = args.state.inky.grid_x
   grid_y = args.state.inky.grid_y
 
   # Calculate the screen coordinates for the highlighted grid cell
-  x = grid_x * grid_size
-  y = grid_y * grid_size
+  x = grid_x * 4
+  y = grid_y * 4
 
   args.lowrez.primitives << {
     x: (0 - args.state.pacman.mx) + x,
     y: (0 - args.state.pacman.my) + y,
-    w: grid_size,
-    h: grid_size,
+    w: 4,
+    h: 4,
     r: 0,
     g: 255,
     b: 0,
@@ -1822,20 +1812,18 @@ def grid_highlight_inky(args)
 end
 
 def grid_highlight_clyde(args)
-  grid_size = 4 # each grid cell is 4x4 pixels
-
   grid_x = args.state.clyde.grid_x
   grid_y = args.state.clyde.grid_y
 
   # Calculate the screen coordinates for the highlighted grid cell
-  x = grid_x * grid_size
-  y = grid_y * grid_size
+  x = grid_x * 4
+  y = grid_y * 4
 
   args.lowrez.primitives << {
     x: (0 - args.state.pacman.mx) + x,
     y: (0 - args.state.pacman.my) + y,
-    w: grid_size,
-    h: grid_size,
+    w: 4,
+    h: 4,
     r: 0,
     g: 255,
     b: 0,

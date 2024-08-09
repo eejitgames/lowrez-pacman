@@ -2114,7 +2114,7 @@ def draw_pacman(args)
 
   if args.state.pacman.anim == :yes
     sprite_index = start_animation_on_tick.frame_index count: 3,     # how many sprites?
-                                                       hold_for: 12, # how long to hold each sprite?
+                                                       hold_for: 4, # how long to hold each sprite?
                                                        repeat: true  # should it repeat?
     args.state.pacman.frame = sprite_index
   else

@@ -185,7 +185,26 @@ def tick(args)
   move_inky args if Kernel.tick_count.zmod? args.state.inky.speed
   move_clyde args if Kernel.tick_count.zmod? args.state.clyde.speed
   exit_ghost_pen args
-  # check_ghosts args # this may not be needed when they have different logic
+  check_ghosts args # this may not be needed when they have different logic
+
+  if args.inputs.keyboard.key_down.forward_slash
+    args.state.show_fps = !args.state.show_fps # ^true # @show_fps = !@show_fps
+  end
+
+  if args.state.show_fps
+    args.lowrez.labels  << {
+    x: 34,
+    y: 57,
+    text: "#{args.gtk.current_framerate.to_sf}",
+    size_enum: LOWREZ_FONT_TI,
+    alignment_enum: 1,
+    r: 0xF4, # f4ec9b
+    g: 0xEC,
+    b: 0x9B,
+    a: 255,
+    font: LOWREZ_FONT_PATH
+    }
+  end
 end
 
 def check_ghosts(args)
@@ -198,12 +217,22 @@ def check_ghosts(args)
   x4, y4 = 1, 2
 
   # Put the pairs in an array
-  pairs = {
-    blinky: [args.state.blinky.x, args.state.blinky.y],
-    pinky: [args.state.pinky.x, args.state.pinky.y],
-    inky: [args.state.inky.x, args.state.inky.y],
-    clyde: [args.state.clyde.x, args.state.clyde.y]
-  }
+  #pairs = {
+  #  blinky: [args.state.blinky.x, args.state.blinky.y],
+  #  pinky: [args.state.pinky.x, args.state.pinky.y],
+  #  inky: [args.state.inky.x, args.state.inky.y],
+  #  clyde: [args.state.clyde.x, args.state.clyde.y]
+  #}
+
+  # if they are not in the pen, and in chase mode, one of them needs to skip a frame
+  pairs = {}
+  pairs[:blinky] = [args.state.blinky.x, args.state.blinky.y] if args.state.blinky.pen == :no && args.state.blinky.mode == :chase
+  pairs[:pinky]  = [args.state.pinky.x , args.state.pinky.y]  if args.state.pinky.pen == :no  && args.state.pinky.mode == :chase
+  pairs[:inky]   = [args.state.inky.x  , args.state.inky.y]   if args.state.inky.pen == :no   && args.state.inky.mode == :chase
+  pairs[:clyde]  = [args.state.clyde.x , args.state.clyde.y]  if args.state.clyde.pen == :no  && args.state.clyde.mode == :chase
+
+  return if pairs.size < 2
+
   # Create a hash to store the pairs and their corresponding keys
   pair_values = Hash.new { |hash, key| hash[key] = [] }
 
@@ -218,12 +247,16 @@ def check_ghosts(args)
   if duplicates.empty?
     # putz "All pairs are unique."
   else
-    putz "Duplicate pairs found:"
+    # putz "Duplicate pairs found:"
     duplicates.each do |pair, keys|
-      putz "Pair (#{pair[0]}, #{pair[1]}) is shared by: #{keys.join(', ')}"
+      # putz "The first duplicate key is: #{keys.first}"
+      # putz "Pair (#{pair[0]}, #{pair[1]}) is shared by: #{keys.join(', ')}"
+      # putz "Ok so the info looks like #{pairs[keys.first]}"
+      # putz "mode: #{args.state[keys.first].mode}"
+      # putz "#{keys.first} is skipping a frame"
+      args.state[keys.first].skip_frame = :true
     end
   end
-  # if they are not in the pen, one of them needs to skip a frame
 end
 
 def exit_ghost_pen(args)

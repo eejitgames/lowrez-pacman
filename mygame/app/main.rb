@@ -50,8 +50,6 @@ def init(args)
     ].reverse
 
   args.state.pacman = {
-    lives: 3,
-    score: 0,
     x: 28 + 4, # sprite positioning, with extra for anchor shift
     y: 28 + 3, # sprite positioning, with extra for anchor shift
     dx: 0,
@@ -166,19 +164,27 @@ def init(args)
     skip_frame: :true,
     entered_pen_time: 240
   }
+  args.state.dots_eaten = 0
+  args.state.should_draw = true
 end
 
 def tick(args)
-  init args if Kernel.tick_count.zero?
-
+  if Kernel.tick_count.zero?
+    init args 
+    args.state.pacman.lives = 3
+    args.state.pacman.score = 0
+  end
   args.lowrez.background_color = [0, 0, 0]
-  draw_maze args
+  check_all_dots_eaten_blink_maze_start_new_level args
+  draw_maze args if args.state.should_draw == true # draw_maze args
   draw_dots args
   draw_score args
-  draw_pinky args
-  draw_inky args
-  draw_blinky args
-  draw_clyde args
+  if args.state.should_draw == true
+    draw_pinky args
+    draw_inky args
+    draw_blinky args
+    draw_clyde args
+  end
   draw_lives args
   draw_pacman args
   check_pacman_hit_status args
@@ -187,10 +193,12 @@ def tick(args)
   player_input args if Kernel.tick_count.zmod? args.state.pacman.speed
   ghost_mode args
   return if args.state.pacman.dir == 0 # pacman has not moved yet, the game has not started
-  move_blinky args if Kernel.tick_count.zmod? args.state.blinky.speed
-  move_pinky args if Kernel.tick_count.zmod? args.state.pinky.speed
-  move_inky args if Kernel.tick_count.zmod? args.state.inky.speed
-  move_clyde args if Kernel.tick_count.zmod? args.state.clyde.speed
+  unless args.state.level_complete == true
+    move_blinky args if Kernel.tick_count.zmod? args.state.blinky.speed
+    move_pinky args if Kernel.tick_count.zmod? args.state.pinky.speed
+    move_inky args if Kernel.tick_count.zmod? args.state.inky.speed
+    move_clyde args if Kernel.tick_count.zmod? args.state.clyde.speed
+  end
   exit_ghost_pen args
   check_ghosts args # this may not be needed when they have different logic
 
@@ -211,6 +219,49 @@ def tick(args)
     a: 255,
     font: LOWREZ_FONT_PATH
     }
+  end
+  # puts60 "dots eaten: #{args.state.dots_eaten}"
+end
+
+def check_all_dots_eaten_blink_maze_start_new_level(args)
+  # Check if the condition to start alternating is met
+  if args.state.dots_eaten > 243
+    # Initialize alternating_start if not already set
+    args.state.alternating_start ||= args.state.tick_count
+    args.state.level_complete = true
+  else
+    # Reset alternating_start to stop alternating if the condition is no longer met
+    args.state.alternating_start = nil
+  end
+
+  # If alternating_start is set, manage the alternating logic
+  if args.state.alternating_start
+    # Determine how many frames have passed since the alternating began
+    elapsed_frames = args.state.tick_count - args.state.alternating_start
+
+    # Check if the alternating should still be active
+    if elapsed_frames < 400
+      # Determine if we're in the drawing phase or the skipping phase
+      cycle_position = elapsed_frames % (2 * 30)
+
+      # Draw only if we're in the first x frames of the cycle (drawing phase)
+      # puts60 "cycle: #{cycle_position}"
+      args.state.should_draw = cycle_position < 30
+    else
+      # After y frames, revert to calling draw_me every frame
+      args.state.alternating_start = nil
+      args.state.level_complete = false
+      args.state.should_draw = true
+      args.state.pacman.anim = :yes
+      current_score = args.state.pacman.score
+      current_lives = args.state.pacman.lives
+      init args
+      args.state.pacman.lives = current_lives
+      args.state.pacman.score = current_score
+    end
+  else
+    # Normal behavior: call draw_me every frame
+    args.state.should_draw = true
   end
 end
 
@@ -233,10 +284,10 @@ def check_ghosts(args)
 
   # if they are not in the pen, and in chase mode, one of them needs to skip a frame
   pairs = {}
-  pairs[:blinky] = [args.state.blinky.x, args.state.blinky.y] if args.state.blinky.pen == :no && args.state.blinky.mode == :chase
-  pairs[:pinky]  = [args.state.pinky.x , args.state.pinky.y]  if args.state.pinky.pen == :no  && args.state.pinky.mode == :chase
-  pairs[:inky]   = [args.state.inky.x  , args.state.inky.y]   if args.state.inky.pen == :no   && args.state.inky.mode == :chase
-  pairs[:clyde]  = [args.state.clyde.x , args.state.clyde.y]  if args.state.clyde.pen == :no  && args.state.clyde.mode == :chase
+  pairs[:blinky] = [args.state.blinky.x, args.state.blinky.y] if args.state.blinky.pen == :no #&& args.state.blinky.mode == :chase
+  pairs[:pinky]  = [args.state.pinky.x , args.state.pinky.y]  if args.state.pinky.pen == :no  #&& args.state.pinky.mode == :chase
+  pairs[:inky]   = [args.state.inky.x  , args.state.inky.y]   if args.state.inky.pen == :no   #&& args.state.inky.mode == :chase
+  pairs[:clyde]  = [args.state.clyde.x , args.state.clyde.y]  if args.state.clyde.pen == :no  #&& args.state.clyde.mode == :chase
 
   return if pairs.size < 2
 
@@ -286,7 +337,7 @@ def exit_ghost_pen(args)
 
   # pinky
   if ((args.state.pinky.pen ==:yes) && (args.state.pinky.entered_pen_time.elapsed_time > 60 * 9)) # 9 seconds
-    args.state.pinky.speed = 2
+    args.state.pinky.speed = 3
     args.state.pinky.mode = :ghost_exit
     args.state.pinky.skip_frame = :true
    end
@@ -303,7 +354,7 @@ def exit_ghost_pen(args)
 
   # inky
   if ((args.state.inky.pen ==:yes) && (args.state.inky.entered_pen_time.elapsed_time > 60 * 9)) # 9 seconds
-    args.state.inky.speed = 2
+    args.state.inky.speed = 3
     args.state.inky.mode = :ghost_exit
     args.state.inky.skip_frame = :true
    end
@@ -320,7 +371,7 @@ def exit_ghost_pen(args)
 
   # clyde
   if ((args.state.clyde.pen ==:yes) && (args.state.clyde.entered_pen_time.elapsed_time > 60 * 9)) # 9 seconds
-    args.state.clyde.speed = 2
+    args.state.clyde.speed = 3
     args.state.clyde.mode = :ghost_exit
     args.state.clyde.skip_frame = :true
    end
@@ -340,6 +391,7 @@ def check_pacman_hit_status(args)
   # check if hit blinky
   if args.state.pacman.grid_x == args.state.blinky.grid_x && args.state.pacman.grid_y == args.state.blinky.grid_y && args.state.blinky.mode == :scatter
     args.state.pacman.score += args.state.pacman.ghost_score
+    # putz "added: #{args.state.pacman.ghost_score}"
     args.state.pacman.ghost_score *= 2
     args.state.blinky.mode = :eyes
     args.state.blinky.target_x = 16
@@ -350,6 +402,7 @@ def check_pacman_hit_status(args)
   # check if hit pinky
   if args.state.pacman.grid_x == args.state.pinky.grid_x && args.state.pacman.grid_y == args.state.pinky.grid_y && args.state.pinky.mode == :scatter
     args.state.pacman.score += args.state.pacman.ghost_score
+    # putz "added: #{args.state.pacman.ghost_score}"
     args.state.pacman.ghost_score *= 2
     args.state.pinky.mode = :eyes
     args.state.pinky.target_x = 16
@@ -360,6 +413,7 @@ def check_pacman_hit_status(args)
   # check if hit inky
   if args.state.pacman.grid_x == args.state.inky.grid_x && args.state.pacman.grid_y == args.state.inky.grid_y && args.state.inky.mode == :scatter
     args.state.pacman.score += args.state.pacman.ghost_score
+    # putz "added: #{args.state.pacman.ghost_score}"
     args.state.pacman.ghost_score *= 2
     args.state.inky.mode = :eyes
     args.state.inky.target_x = 16
@@ -370,6 +424,7 @@ def check_pacman_hit_status(args)
   # check if hit clyde
   if args.state.pacman.grid_x == args.state.clyde.grid_x && args.state.pacman.grid_y == args.state.clyde.grid_y && args.state.clyde.mode == :scatter
     args.state.pacman.score += args.state.pacman.ghost_score
+    # putz "added: #{args.state.pacman.ghost_score}"
     args.state.pacman.ghost_score *= 2
     args.state.clyde.mode = :eyes
     args.state.clyde.target_x = 16
@@ -390,21 +445,21 @@ def ghost_mode(args)
 
     # pinky
     unless args.state.pinky.pen == :yes || args.state.pinky.mode == :eyes
-      args.state.pinky.speed = 2
+      args.state.pinky.speed = 3
       args.state.pinky.mode = :chase
       args.state.pacman.ghost_score = 200
     end
 
     # inky
     unless args.state.inky.pen == :yes || args.state.inky.mode == :eyes
-      args.state.inky.speed = 2
+      args.state.inky.speed = 3
       args.state.inky.mode = :chase
       args.state.pacman.ghost_score = 200
     end
 
     # clyde
     unless args.state.clyde.pen == :yes || args.state.clyde.mode == :eyes
-      args.state.clyde.speed = 2
+      args.state.clyde.speed = 3
       args.state.clyde.mode = :chase
       args.state.pacman.ghost_score = 200
     end
@@ -1031,7 +1086,7 @@ def move_inky(args)
   #putz "offset x, y: #{offset_x}, #{offset_y}"
   intermediate_x = args.state.pacman.grid_x + offset_x
   intermediate_y = args.state.pacman.grid_y + offset_y
-  putz "intermediate x, y: #{intermediate_x}, #{intermediate_y}"
+  #putz "intermediate x, y: #{intermediate_x}, #{intermediate_y}"
 
   #grid_x = args.state.pinky.target_x
   #grid_y = args.state.pinky.target_y
@@ -1045,7 +1100,7 @@ def move_inky(args)
   # Step 3: Double the vector to get Inky's target
   inky_target_x = intermediate_x + vector_x
   inky_target_y = intermediate_y + vector_y
-  putz "inky target x, y: #{inky_target_x}, #{inky_target_y}"
+  #putz "inky target x, y: #{inky_target_x}, #{inky_target_y}"
 
   #tx.cap_min_max(4, 29)
   #ty.cap_min_max(4, 32)
@@ -1970,15 +2025,19 @@ def player_input(args)
     when 1
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
       args.state.pacman.score += 10
+      args.state.dots_eaten += 1
     when 3
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 4
       args.state.pacman.score += 10
+      args.state.dots_eaten += 1
     when 5
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
       args.state.pacman.score += 10
+      args.state.dots_eaten += 1
     when 2
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
       args.state.pacman.score += 50
+      args.state.dots_eaten += 1
       args.state.pacman.powered_up = Kernel.tick_count
 
       # blinky
@@ -2007,6 +2066,7 @@ def player_input(args)
     when 7
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
       args.state.pacman.score += 50
+      args.state.dots_eaten += 1
       args.state.pacman.powered_up = Kernel.tick_count
 
       # blinky
@@ -2036,8 +2096,11 @@ def player_input(args)
 
   args.state.pacman.move_x = move_x
   args.state.pacman.move_y = move_y
-  args.state.pacman.mx += move_x
-  args.state.pacman.my += move_y
+  
+  unless args.state.level_complete == true
+    args.state.pacman.mx += move_x
+    args.state.pacman.my += move_y
+  end
 
   # args.state.map_origin_x = 32 + args.state.pacman.mx
   # args.state.map_origin_y = 31 + args.state.pacman.my
@@ -2112,6 +2175,7 @@ end
 def draw_pacman(args)
   start_animation_on_tick = 1
 
+  args.state.pacman.anim = :no if args.state.level_complete == true
   if args.state.pacman.anim == :yes
     sprite_index = start_animation_on_tick.frame_index count: 3,     # how many sprites?
                                                        hold_for: 4, # how long to hold each sprite?

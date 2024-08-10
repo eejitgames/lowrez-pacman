@@ -168,6 +168,10 @@ def init(args)
   args.state.should_draw = true
 end
 
+def reset(args)
+  args.state.pacman_is_dead = nil
+end
+
 def tick(args)
   if Kernel.tick_count.zero?
     init args 
@@ -186,7 +190,7 @@ def tick(args)
     draw_clyde args
   end
   draw_lives args
-  draw_pacman args
+  draw_pacman args unless args.state.pacman_is_dead
   check_pacman_hit_status args
   # render_debug args
   return if game_has_lost_focus?
@@ -431,6 +435,19 @@ def check_pacman_hit_status(args)
     args.state.clyde.target_y = 22
     args.state.clyde.speed = 1
   end
+
+  if args.state.pacman.grid_x == args.state.blinky.grid_x && args.state.pacman.grid_y == args.state.blinky.grid_y && args.state.blinky.mode == :chase
+    args.state.pacman_is_dead = true
+  end
+  if args.state.pacman.grid_x == args.state.pinky.grid_x && args.state.pacman.grid_y == args.state.pinky.grid_y && args.state.pinky.mode == :chase
+    args.state.pacman_is_dead = true
+  end
+  if args.state.pacman.grid_x == args.state.inky.grid_x && args.state.pacman.grid_y == args.state.inky.grid_y && args.state.inky.mode == :chase
+    args.state.pacman_is_dead = true
+  end
+  if args.state.pacman.grid_x == args.state.clyde.grid_x && args.state.pacman.grid_y == args.state.clyde.grid_y && args.state.clyde.mode == :chase
+    args.state.pacman_is_dead = true
+  end
 end
 
 def ghost_mode(args)
@@ -548,7 +565,8 @@ def move_blinky(args)
   end
 
   # stall ghost slightly in a corner, helps a tiny bit ;)
-  if args.state.blinky_in_a_corner == :yes && args.state.blinky.skip_frame == :true && args.state.blinky.pen == :no
+  #if args.state.blinky_in_a_corner == :yes && args.state.blinky.skip_frame == :true && args.state.blinky.pen == :no
+  if args.state.blinky.skip_frame == :true && args.state.blinky.pen == :no
     args.state.blinky.skip_frame = :false
     return
   end
@@ -832,7 +850,8 @@ def move_pinky(args)
   end
 
   # stall ghost slightly in a corner, helps a tiny bit ;)
-  if args.state.pinky_in_a_corner == :yes && args.state.pinky.skip_frame == :true && args.state.pinky.pen == :no
+  #if args.state.pinky_in_a_corner == :yes && args.state.pinky.skip_frame == :true && args.state.pinky.pen == :no
+  if args.state.pinky.skip_frame == :true && args.state.pinky.pen == :no
     args.state.pinky.skip_frame = :false
     return
   end
@@ -1229,7 +1248,8 @@ puts "Inky's target position is (#{inky_target_x}, #{inky_target_y})"
   end
 
   # stall ghost slightly in a corner, helps a tiny bit ;)
-  if args.state.inky_in_a_corner == :yes && args.state.inky.skip_frame == :true && args.state.inky.pen == :no
+  # if args.state.inky_in_a_corner == :yes && args.state.inky.skip_frame == :true && args.state.inky.pen == :no
+  if args.state.inky.skip_frame == :true && args.state.inky.pen == :no
     args.state.inky.skip_frame = :false
     return
   end
@@ -1508,7 +1528,8 @@ def move_clyde(args)
   end
 
   # stall ghost slightly in a corner, helps a tiny bit ;)
-  if args.state.clyde_in_a_corner == :yes && args.state.clyde.skip_frame == :true && args.state.clyde.pen == :no
+  # if args.state.clyde_in_a_corner == :yes && args.state.clyde.skip_frame == :true && args.state.clyde.pen == :no
+  if args.state.clyde.skip_frame == :true && args.state.clyde.pen == :no
     args.state.clyde.skip_frame = :false
     return
   end
@@ -1973,6 +1994,7 @@ def player_input(args)
   point_y = 31 + args.state.pacman.my
 
   return if args.state.level_complete == true
+  return if args.state.pacman_is_dead == true
 
   if args.inputs.up
     if (((args.state.pacman.mx - 1) % 4) == 0) && (args.state.maze[(point_y/ 4).floor + 1][(point_x / 4).floor] < 9)

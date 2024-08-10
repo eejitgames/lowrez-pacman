@@ -191,13 +191,14 @@ def tick(args)
   end
   draw_lives args
   draw_pacman args unless args.state.pacman_is_dead
+  draw_pacman_death_anim args if args.state.pacman_is_dead
   check_pacman_hit_status args
   # render_debug args
   return if game_has_lost_focus?
   player_input args if Kernel.tick_count.zmod? args.state.pacman.speed
   ghost_mode args
   return if args.state.pacman.dir == 0 # pacman has not moved yet, the game has not started
-  unless args.state.level_complete == true
+  unless args.state.level_complete == true # || args.state.pacman_is_dead == true
     move_blinky args if Kernel.tick_count.zmod? args.state.blinky.speed
     move_pinky args if Kernel.tick_count.zmod? args.state.pinky.speed
     move_inky args if Kernel.tick_count.zmod? args.state.inky.speed
@@ -437,16 +438,28 @@ def check_pacman_hit_status(args)
   end
 
   if args.state.pacman.grid_x == args.state.blinky.grid_x && args.state.pacman.grid_y == args.state.blinky.grid_y && args.state.blinky.mode == :chase
-    #args.state.pacman_is_dead = true
+    unless args.state.pacman_is_dead == true
+      args.state.pacman_is_dead = true 
+      args.state.death_start = Kernel.tick_count
+    end
   end
   if args.state.pacman.grid_x == args.state.pinky.grid_x && args.state.pacman.grid_y == args.state.pinky.grid_y && args.state.pinky.mode == :chase
-    #args.state.pacman_is_dead = true
+    unless args.state.pacman_is_dead == true
+      args.state.pacman_is_dead = true
+      args.state.death_start = Kernel.tick_count
+    end
   end
   if args.state.pacman.grid_x == args.state.inky.grid_x && args.state.pacman.grid_y == args.state.inky.grid_y && args.state.inky.mode == :chase
-    #args.state.pacman_is_dead = true
+    unless args.state.pacman_is_dead == true
+      args.state.pacman_is_dead = true
+      args.state.death_start = Kernel.tick_count
+    end
   end
   if args.state.pacman.grid_x == args.state.clyde.grid_x && args.state.pacman.grid_y == args.state.clyde.grid_y && args.state.clyde.mode == :chase
-    #args.state.pacman_is_dead = true
+    unless args.state.pacman_is_dead == true
+      args.state.pacman_is_dead = true
+      args.state.death_start = Kernel.tick_count
+    end
   end
 end
 
@@ -2223,6 +2236,37 @@ def draw_pacman(args)
     }
   else
     countdown_in_seconds = ((start_animation_on_tick - Kernel.tick_count) / 60).round(1)
+  end
+end
+
+def draw_pacman_death_anim(args)
+  # start_animation_on_tick = 1
+  # args.state.pacman.anim = :no if args.state.level_complete == true
+  if args.state.pacman_is_dead == true
+    sprite_index = args.state.death_start.frame_index count: 11,     # how many sprites?
+                                                     hold_for: 9,   # how long to hold each sprite?
+                                                      repeat: false  # should it repeat?
+  #args.state.pacman.frame = sprite_index
+  else
+    sprite_index = 0
+  end
+  
+  # putz "sprite index: #{sprite_index}"
+
+  if sprite_index
+    sprite_path  = "sprites/pac-death-#{sprite_index}.png"
+    args.lowrez.primitives << {
+      x: args.state.pacman[:x] + args.state.pacman.offset[1].x,
+      y: args.state.pacman[:y] + args.state.pacman.offset[1].y,
+      w: 8,
+      h: 8,
+      path: sprite_path,
+      anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
+      anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
+      angle: 0
+    }
+  #else
+  #  countdown_in_seconds = ((start_animation_on_tick - Kernel.tick_count) / 60).round(1)
   end
 end
 

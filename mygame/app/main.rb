@@ -1972,6 +1972,8 @@ def player_input(args)
   point_x = 32 + args.state.pacman.mx
   point_y = 31 + args.state.pacman.my
 
+  return if args.state.level_complete == true
+
   if args.inputs.up
     if (((args.state.pacman.mx - 1) % 4) == 0) && (args.state.maze[(point_y/ 4).floor + 1][(point_x / 4).floor] < 9)
       args.state.pacman[:dir] = 1
@@ -2097,10 +2099,10 @@ def player_input(args)
   args.state.pacman.move_x = move_x
   args.state.pacman.move_y = move_y
   
-  unless args.state.level_complete == true
+  #unless args.state.level_complete == true
     args.state.pacman.mx += move_x
     args.state.pacman.my += move_y
-  end
+  #end
 
   # args.state.map_origin_x = 32 + args.state.pacman.mx
   # args.state.map_origin_y = 31 + args.state.pacman.my

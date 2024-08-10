@@ -244,7 +244,7 @@ def check_all_dots_eaten_blink_maze_start_new_level(args)
     elapsed_frames = args.state.tick_count - args.state.alternating_start
 
     # Check if the alternating should still be active
-    if elapsed_frames < 400
+    if elapsed_frames < 300
       # Determine if we're in the drawing phase or the skipping phase
       cycle_position = elapsed_frames % (2 * 30)
 
@@ -437,16 +437,16 @@ def check_pacman_hit_status(args)
   end
 
   if args.state.pacman.grid_x == args.state.blinky.grid_x && args.state.pacman.grid_y == args.state.blinky.grid_y && args.state.blinky.mode == :chase
-    args.state.pacman_is_dead = true
+    #args.state.pacman_is_dead = true
   end
   if args.state.pacman.grid_x == args.state.pinky.grid_x && args.state.pacman.grid_y == args.state.pinky.grid_y && args.state.pinky.mode == :chase
-    args.state.pacman_is_dead = true
+    #args.state.pacman_is_dead = true
   end
   if args.state.pacman.grid_x == args.state.inky.grid_x && args.state.pacman.grid_y == args.state.inky.grid_y && args.state.inky.mode == :chase
-    args.state.pacman_is_dead = true
+    #args.state.pacman_is_dead = true
   end
   if args.state.pacman.grid_x == args.state.clyde.grid_x && args.state.pacman.grid_y == args.state.clyde.grid_y && args.state.clyde.mode == :chase
-    args.state.pacman_is_dead = true
+    #args.state.pacman_is_dead = true
   end
 end
 

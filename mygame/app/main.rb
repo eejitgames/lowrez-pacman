@@ -192,7 +192,8 @@ def tick(args)
     args.state.pacman.score = 0
     args.state.dots_eaten = 0
     args.state.next_life_threshold = 10000
-    args.state.fruit = 0 # this is the first fruit, cherries
+    args.state.fruit = -1 # this is will be incremented to give the first fruit, cherries
+    args.state.fruit_target_dots = nil
   end
   args.lowrez.background_color = [0, 0, 0]
   check_all_dots_eaten_blink_maze_start_new_level args
@@ -249,9 +250,30 @@ end
 def fruit_handling(args)
     # check if we should enable flags to make a fruit available
     # The first fruit appears when Pac-Man has eaten 70 of the dots in the maze, and the second when 170 have been eaten.
+    args.state.fruit_target_dots ||= 70
+    if args.state.dots_eaten >= args.state.fruit_target_dots
+      args.state.fruit_target_dots += 100
+      args.state.draw_fruit = :true
+      args.state.fruit_timer_start = Kernel.tick_count
+      args.state.fruit += 1
+    end
 
+    args.state.draw_fruit = :false if args.state.fruit_timer_start.elapsed_time > 60 * 9 # 9 seconds
 
-    # check flags to see if we should draw a fruit
+    if args.state.draw_fruit == :true
+      sprite_path  = "sprites/#{args.state.fruits[args.state.fruit]}.png"
+      args.lowrez.primitives << {
+      x: (0 - args.state.pacman.mx + 1) + 67,
+      y: (0 - args.state.pacman.my) + 66,
+      w: 8,
+      h: 8,
+      path: sprite_path,
+      anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
+      anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
+      angle: 0
+      }
+    end
+    # check flags to see if we should draw a fruit - it has a timer for long it appears
     # cherries, strawberry,
 
 
@@ -1912,6 +1934,7 @@ def draw_ready(args)
   args.state.pinky.entered_pen_time = Kernel.tick_count
   args.state.inky.entered_pen_time = Kernel.tick_count + 120
   args.state.clyde.entered_pen_time = Kernel.tick_count + 240
+  args.state.draw_fruit = :false
 end
 
 def draw_game_over(args)
@@ -2438,6 +2461,7 @@ def draw_pacman_death_anim(args)
         args.state.dots_eaten = 0
         args.state.key_released = nil
         args.state.next_life_threshold = 10000
+        args.state.fruit_target_dots = nil
       end
         
       # keys: {:down=>[:left_arrow, :raw_key], :held=>[], :down_or_held=>[:left_arrow, :raw_key], :up=>[]}

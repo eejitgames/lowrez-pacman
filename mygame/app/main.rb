@@ -47,7 +47,7 @@ def init(args)
     [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9 ],
     [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9 ],
     [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9 ]
-    ].reverse
+    ].reverse unless args.state.new_wave
 
   args.state.pacman = {
     x: 28 + 4, # sprite positioning, with extra for anchor shift
@@ -164,9 +164,11 @@ def init(args)
     skip_frame: :true,
     entered_pen_time: 240
   }
-  args.state.dots_eaten = 0
+  # args.state.dots_eaten = 0
   args.state.should_draw = true
   # @my_var = "testing testing"
+  args.state.new_level_timer = nil
+  args.state.new_wave = nil
 end
 
 def reset(args)
@@ -178,6 +180,7 @@ def tick(args)
     init args 
     args.state.pacman.lives = 3
     args.state.pacman.score = 0
+    args.state.dots_eaten = 0
   end
   args.lowrez.background_color = [0, 0, 0]
   check_all_dots_eaten_blink_maze_start_new_level args
@@ -263,9 +266,11 @@ def check_all_dots_eaten_blink_maze_start_new_level(args)
       args.state.pacman.anim = :yes
       current_score = args.state.pacman.score
       current_lives = args.state.pacman.lives
+      current_dots = args.state.dots_eaten
       init args
       args.state.pacman.lives = current_lives
       args.state.pacman.score = current_score
+      args.state.dots_eaten = current_dots
     end
   else
     # Normal behavior: call draw_me every frame
@@ -1840,6 +1845,7 @@ def draw_score(args)
 end
 
 def draw_ready(args)
+  args.state.alternating_start = nil
   args.lowrez.labels  << {
     x: 34,
     y: 57,
@@ -2274,14 +2280,15 @@ def draw_pacman_death_anim(args)
   # start_animation_on_tick = 1
   # args.state.pacman.anim = :no if args.state.level_complete == true
   if args.state.pacman_is_dead == true
-    sprite_index = args.state.death_start.frame_index count: 11,     # how many sprites?
+    sprite_index = args.state.death_start.frame_index count: 12,     # how many sprites?
                                                      hold_for: 9,   # how long to hold each sprite?
                                                       repeat: false  # should it repeat?
   #args.state.pacman.frame = sprite_index
-  else
-    sprite_index = 0
+  #else
+    #  sprite_index = 0
   end
   
+  # args.state.new_wave = nil
   # putz "sprite index: #{sprite_index}"
 
   if sprite_index
@@ -2298,6 +2305,21 @@ def draw_pacman_death_anim(args)
     }
   #else
   #  countdown_in_seconds = ((start_animation_on_tick - Kernel.tick_count) / 60).round(1)
+  else
+    args.state.new_level_timer ||= Kernel.tick_count
+    if args.state.new_level_timer.elapsed_time > 60
+      args.state.new_wave = :true
+      args.state.pacman.lives -= 1
+      
+      putz "game over" if args.state.pacman.lives < 0 
+      
+      current_score = args.state.pacman.score
+      current_lives = args.state.pacman.lives
+      init args
+      args.state.pacman.lives = current_lives
+      args.state.pacman.score = current_score
+      args.state.pacman_is_dead = nil
+    end
   end
 end
 

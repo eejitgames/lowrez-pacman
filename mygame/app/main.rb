@@ -166,6 +166,12 @@ def init(args)
   }
 
   args.state.fruits = [
+    "cherries",
+    "strawberry",
+    "orange",
+    "apple",
+    "melon",
+    "galaxian"
   ]
 
   # args.state.dots_eaten = 0
@@ -186,6 +192,7 @@ def tick(args)
     args.state.pacman.score = 0
     args.state.dots_eaten = 0
     args.state.next_life_threshold = 10000
+    args.state.fruit = 0 # this is the first fruit, cherries
   end
   args.lowrez.background_color = [0, 0, 0]
   check_all_dots_eaten_blink_maze_start_new_level args

@@ -2345,8 +2345,21 @@ def draw_pacman_death_anim(args)
     
     if args.state.game_over == :true
       draw_game_over args
-      # we stay here until the player presses a key
-      if args.inputs.keyboard.active
+      # we stay here until the player releases a key
+      
+      #if args.inputs.keyboard.keys.down_or_held.size > 1
+        #putz "something is pressed or is held"
+        #putz "keys: #{args.inputs.keyboard.keys}"
+        # ]}
+        # - 003281 [Game] something is pressed or is held
+        # - 003281 [Game] keys: {:down=>[], :held=>[], :down_or_held=>[], :up=>[]}
+        # - 0032
+      #else
+      #  puts60 "nothing pressed/held"
+      #end
+      
+      if args.state.key_released 
+        # putz "a key is released"
         args.state.pacman_is_dead = nil
         args.state.game_over = nil
         args.state.new_wave = nil
@@ -2355,6 +2368,20 @@ def draw_pacman_death_anim(args)
         args.state.pacman.lives = 3
         args.state.pacman.score = 0
         args.state.dots_eaten = 0
+        args.state.key_released = nil
+      end
+        
+      # keys: {:down=>[:left_arrow, :raw_key], :held=>[], :down_or_held=>[:left_arrow, :raw_key], :up=>[]}
+        
+      if args.inputs.keyboard.keys.down_or_held.size > 1
+        #putz "a key is pressed"
+        #putz "keys: #{args.inputs.keyboard.keys}"
+        # Set a flag when any key is pressed
+        args.state.key_pressed = :true
+      elsif args.state.key_pressed
+        # When no key is active (released) and a key was previously pressed, set the release flag
+        args.state.key_released = :true
+        args.state.key_pressed = nil
       end
     end
   end

@@ -2133,6 +2133,15 @@ def player_input(args)
       args.state.pacman.score += 50
       args.state.dots_eaten += 1
       args.state.pacman.powered_up = Kernel.tick_count
+      # play the sirens, ghosts are running for their lives
+      args.audio[rand] = {
+        input: 'sounds/sirens.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 0.2,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: true                # Set to true to loop the sound/music until you stop it
+      }
 
       # blinky
       unless args.state.blinky.mode ==:eyes || args.state.blinky.pen == :yes
@@ -2162,6 +2171,15 @@ def player_input(args)
       args.state.pacman.score += 50
       args.state.dots_eaten += 1
       args.state.pacman.powered_up = Kernel.tick_count
+      # play the sirens, ghosts are running for their lives
+      args.audio[rand] = {
+        input: 'sounds/sirens.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 0.2,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: true                # Set to true to loop the sound/music until you stop it
+      }
 
       # blinky
       unless args.state.blinky.mode ==:eyes || args.state.blinky.pen == :yes

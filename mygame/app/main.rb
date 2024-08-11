@@ -377,7 +377,7 @@ def check_ghosts(args)
       # putz "Ok so the info looks like #{pairs[keys.first]}"
       # putz "mode: #{args.state[keys.first].mode}"
       # putz "#{keys.first} is skipping a frame"
-      args.state[keys.first].skip_frame = :true
+      args.state[keys.first].skip_frame = :true unless args.state[keys.first].mode == :eyes
     end
   end
 end

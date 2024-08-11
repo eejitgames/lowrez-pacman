@@ -267,6 +267,8 @@ def check_all_dots_eaten_blink_maze_start_new_level(args)
       current_score = args.state.pacman.score
       current_lives = args.state.pacman.lives
       current_dots = args.state.dots_eaten
+      current_dots = 0 if args.state.dots_eaten > 243
+      args.state.alternating_start = nil
       init args
       args.state.pacman.lives = current_lives
       args.state.pacman.score = current_score
@@ -1845,7 +1847,6 @@ def draw_score(args)
 end
 
 def draw_ready(args)
-  args.state.alternating_start = nil
   args.lowrez.labels  << {
     x: 34,
     y: 57,

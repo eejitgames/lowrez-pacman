@@ -1864,6 +1864,25 @@ def draw_ready(args)
   args.state.clyde.entered_pen_time = Kernel.tick_count + 240
 end
 
+def draw_game_over(args)
+  args.lowrez.labels  << {
+    x: 34,
+    y: 57,
+    text: "Game Over",
+    size_enum: LOWREZ_FONT_TI,
+    alignment_enum: 1,
+    r: 0xF4, # f4ec9b
+    g: 0xEC,
+    b: 0x9B,
+    a: 255,
+    font: LOWREZ_FONT_PATH
+  }
+  args.state.pinky.entered_pen_time = Kernel.tick_count
+  args.state.inky.entered_pen_time = Kernel.tick_count + 120
+  args.state.clyde.entered_pen_time = Kernel.tick_count + 240
+end
+
+
 def grid_highlight(args)
   grid_x = args.state.pacman.grid_x
   grid_y = args.state.pacman.grid_y
@@ -2308,18 +2327,35 @@ def draw_pacman_death_anim(args)
   #  countdown_in_seconds = ((start_animation_on_tick - Kernel.tick_count) / 60).round(1)
   else
     args.state.new_level_timer ||= Kernel.tick_count
+    args.state.game_over_timer ||= Kernel.tick_count
+
     if args.state.new_level_timer.elapsed_time > 60
       args.state.new_wave = :true
       args.state.pacman.lives -= 1
       
-      putz "game over" if args.state.pacman.lives < 0 
+      args.state.game_over = :true if args.state.pacman.lives < 0 
       
       current_score = args.state.pacman.score
       current_lives = args.state.pacman.lives
-      init args
+      init args unless args.state.game_over == :true
       args.state.pacman.lives = current_lives
       args.state.pacman.score = current_score
-      args.state.pacman_is_dead = nil
+      args.state.pacman_is_dead = nil unless args.state.game_over == :true
+    end unless args.state.game_over == :true
+    
+    if args.state.game_over == :true
+      draw_game_over args
+      # we stay here until the player presses a key
+      if args.inputs.keyboard.active
+        args.state.pacman_is_dead = nil
+        args.state.game_over = nil
+        args.state.new_wave = nil
+        init args
+        args.state.level_complete = :true
+        args.state.pacman.lives = 3
+        args.state.pacman.score = 0
+        args.state.dots_eaten = 0
+      end
     end
   end
 end

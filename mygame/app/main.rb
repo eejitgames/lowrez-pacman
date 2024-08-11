@@ -91,14 +91,14 @@ def init(args)
     mode: :chase, # mode either chase or scatter
     speed: 2,
     skip_frame: :true,
-    entered_pen_time: 0,
-    offset: [
-      [0,   0],  # no offset
-      [0,   2],  # 2 tiles up
-      [2,   0],  # 2 tiles right
-      [0,  -2],  # 2 tiles down
-      [-2,  0]   # 2 tiles left
-    ]
+    entered_pen_time: 0
+    #offset: [
+    #  [0,   0],  # no offset
+    #  [0,   2],  # 2 tiles up
+    #  [2,   0],  # 2 tiles right
+    #  [0,  -2],  # 2 tiles down
+    #  [-2,  0]   # 2 tiles left
+    #]
   }
 
   args.state.pinky = {
@@ -164,6 +164,10 @@ def init(args)
     skip_frame: :true,
     entered_pen_time: 240
   }
+
+  args.state.fruits = [
+  ]
+
   # args.state.dots_eaten = 0
   args.state.should_draw = true
   # @my_var = "testing testing"
@@ -187,6 +191,7 @@ def tick(args)
   check_all_dots_eaten_blink_maze_start_new_level args
   draw_maze args if args.state.should_draw == true # draw_maze args
   draw_dots args
+  fruit_handling args
   draw_score args
   if args.state.should_draw == true
     draw_pinky args
@@ -232,6 +237,35 @@ def tick(args)
     }
   end
   # puts60 "dots eaten: #{args.state.dots_eaten}"
+end
+
+def fruit_handling(args)
+    # check if we should enable flags to make a fruit available
+    # The first fruit appears when Pac-Man has eaten 70 of the dots in the maze, and the second when 170 have been eaten.
+
+
+    # check flags to see if we should draw a fruit
+    # cherries, strawberry,
+
+
+    # check pacman position to eat fruit and award score
+
+
+
+
+    # sprite_path  = "sprites/blinky-#{args.state.blinky.dir}.png"
+
+    #return if args.state.cherries_awarded
+    #args.lowrez.primitives << {
+    #  x: (0 - args.state.pacman.mx + 1) + 67,
+    #  y: (0 - args.state.pacman.my) + 66,
+    #  w: 8,
+    #  h: 8,
+    #  path: sprite_path,
+    #  anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
+    #  anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
+    #  angle: 0
+    #}
 end
 
 def check_for_extra_life(args)
@@ -2143,14 +2177,14 @@ def player_input(args)
       args.state.dots_eaten += 1
       args.state.pacman.powered_up = Kernel.tick_count
       # play the sirens, ghosts are running for their lives
-      args.audio[rand] = {
-        input: 'sounds/sirens.ogg',  # Filename
-        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
-        gain: 0.2,                   # Volume (0.0 to 1.0)
-        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
-        paused: false,               # Set to true to pause the sound at the current playback position
-        looping: false               # Set to true to loop the sound/music until you stop it
-      }
+      #args.audio[rand] = {
+      #  input: 'sounds/sirens.ogg',  # Filename
+      #  x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      #  gain: 0.2,                   # Volume (0.0 to 1.0)
+      #  pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      #  paused: false,               # Set to true to pause the sound at the current playback position
+      #  looping: false               # Set to true to loop the sound/music until you stop it
+      #}
 
       # blinky
       unless args.state.blinky.mode ==:eyes || args.state.blinky.pen == :yes
@@ -2181,14 +2215,14 @@ def player_input(args)
       args.state.dots_eaten += 1
       args.state.pacman.powered_up = Kernel.tick_count
       # play the sirens, ghosts are running for their lives
-      args.audio[rand] = {
-        input: 'sounds/sirens.ogg',  # Filename
-        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
-        gain: 0.2,                   # Volume (0.0 to 1.0)
-        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
-        paused: false,               # Set to true to pause the sound at the current playback position
-        looping: true                # Set to true to loop the sound/music until you stop it
-      }
+      #args.audio[rand] = {
+      #  input: 'sounds/sirens.ogg',  # Filename
+      #  x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      #  gain: 0.2,                   # Volume (0.0 to 1.0)
+      #  pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      #  paused: false,               # Set to true to pause the sound at the current playback position
+      #  looping: false                # Set to true to loop the sound/music until you stop it
+      #}
 
       # blinky
       unless args.state.blinky.mode ==:eyes || args.state.blinky.pen == :yes

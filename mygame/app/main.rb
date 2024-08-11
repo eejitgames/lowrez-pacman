@@ -166,6 +166,7 @@ def init(args)
   }
   args.state.dots_eaten = 0
   args.state.should_draw = true
+  # @my_var = "testing testing"
 end
 
 def reset(args)
@@ -230,6 +231,8 @@ end
 
 def check_all_dots_eaten_blink_maze_start_new_level(args)
   # Check if the condition to start alternating is met
+  # puts60 "this is a test: #{@my_var}"
+  # if @state.dots_eaten > 4
   if args.state.dots_eaten > 243
     # Initialize alternating_start if not already set
     args.state.alternating_start ||= args.state.tick_count
@@ -556,6 +559,13 @@ def move_blinky(args)
       args.state.blinky.x -= 1 if (move_x == 0) && (((args.state.blinky.x - 1) % 4) != 0)
   end
 
+  # stall ghost slightly in a corner, helps a tiny bit ;)
+  #if args.state.blinky_in_a_corner == :yes && args.state.blinky.skip_frame == :true && args.state.blinky.pen == :no
+  if args.state.blinky.skip_frame == :true && args.state.blinky.pen == :no
+    args.state.blinky.skip_frame = :false
+    return
+  end
+
   args.state.blinky.x += move_x
   args.state.blinky.y += move_y
 
@@ -579,10 +589,10 @@ def move_blinky(args)
 
   # stall ghost slightly in a corner, helps a tiny bit ;)
   #if args.state.blinky_in_a_corner == :yes && args.state.blinky.skip_frame == :true && args.state.blinky.pen == :no
-  if args.state.blinky.skip_frame == :true && args.state.blinky.pen == :no
-    args.state.blinky.skip_frame = :false
-    return
-  end
+  #if args.state.blinky.skip_frame == :true && args.state.blinky.pen == :no
+  #  args.state.blinky.skip_frame = :false
+  #  return
+  #end
 
   if (blinky_over == 3 || blinky_over == 4) && (((args.state.blinky.x - 1 ) % 4) == 0) && (((args.state.blinky.y - 2 ) % 4) == 0)
     args.state.blinky_in_a_junction = :yes
@@ -637,6 +647,7 @@ def move_blinky(args)
 
     # for a corner loop over the directions skipping the current dir and it's opposite
     if args.state.blinky_in_a_corner == :yes
+      args.state.blinky.skip_frame = :true unless args.state.blinky.pen == :yes
       case args.state.blinky.dir
         when 1
         # if going up, check left and right
@@ -739,7 +750,6 @@ def move_blinky(args)
         end
       end
     end
-    args.state.blinky.skip_frame = :true
   end
   args.state.blinky.allowed_up = allowed_up
   args.state.blinky.allowed_right = allowed_right
@@ -841,6 +851,13 @@ def move_pinky(args)
       args.state.pinky.x -= 1 if (move_x == 0) && (((args.state.pinky.x - 1) % 4) != 0)
   end
 
+  # stall ghost slightly in a corner, helps a tiny bit ;)
+  #if args.state.pinky_in_a_corner == :yes && args.state.pinky.skip_frame == :true && args.state.pinky.pen == :no
+  if args.state.pinky.skip_frame == :true && args.state.pinky.pen == :no
+    args.state.pinky.skip_frame = :false
+    return
+  end
+
   args.state.pinky.x += move_x
   args.state.pinky.y += move_y
 
@@ -864,10 +881,10 @@ def move_pinky(args)
 
   # stall ghost slightly in a corner, helps a tiny bit ;)
   #if args.state.pinky_in_a_corner == :yes && args.state.pinky.skip_frame == :true && args.state.pinky.pen == :no
-  if args.state.pinky.skip_frame == :true && args.state.pinky.pen == :no
-    args.state.pinky.skip_frame = :false
-    return
-  end
+  #if args.state.pinky.skip_frame == :true && args.state.pinky.pen == :no
+  #  args.state.pinky.skip_frame = :false
+  #  return
+  #end
 
   if (pinky_over == 3 || pinky_over == 4) && (((args.state.pinky.x - 1 ) % 4) == 0) && (((args.state.pinky.y - 2 ) % 4) == 0)
     args.state.pinky_in_a_junction = :yes
@@ -922,6 +939,7 @@ def move_pinky(args)
 
     # for a corner loop over the directions skipping the current dir and it's opposite
     if args.state.pinky_in_a_corner == :yes
+      args.state.pinky.skip_frame = :true unless args.state.pinky.pen == :yes
       case args.state.pinky.dir
         when 1
         # if going up, check left and right
@@ -1024,7 +1042,6 @@ def move_pinky(args)
         end
       end
     end
-    args.state.pinky.skip_frame = :true
   end
   args.state.pinky.allowed_up = allowed_up
   args.state.pinky.allowed_right = allowed_right
@@ -1239,6 +1256,13 @@ puts "Inky's target position is (#{inky_target_x}, #{inky_target_y})"
       args.state.inky.x -= 1 if (move_x == 0) && (((args.state.inky.x - 1) % 4) != 0)
   end
 
+  # stall ghost slightly in a corner, helps a tiny bit ;)
+  # if args.state.inky_in_a_corner == :yes && args.state.inky.skip_frame == :true && args.state.inky.pen == :no
+  if args.state.inky.skip_frame == :true && args.state.inky.pen == :no
+    args.state.inky.skip_frame = :false
+    return
+  end
+
   args.state.inky.x += move_x
   args.state.inky.y += move_y
 
@@ -1262,10 +1286,10 @@ puts "Inky's target position is (#{inky_target_x}, #{inky_target_y})"
 
   # stall ghost slightly in a corner, helps a tiny bit ;)
   # if args.state.inky_in_a_corner == :yes && args.state.inky.skip_frame == :true && args.state.inky.pen == :no
-  if args.state.inky.skip_frame == :true && args.state.inky.pen == :no
-    args.state.inky.skip_frame = :false
-    return
-  end
+  #if args.state.inky.skip_frame == :true && args.state.inky.pen == :no
+  #  args.state.inky.skip_frame = :false
+  #  return
+  #end
 
   if (inky_over == 3 || inky_over == 4) && (((args.state.inky.x - 1 ) % 4) == 0) && (((args.state.inky.y - 2 ) % 4) == 0)
     args.state.inky_in_a_junction = :yes
@@ -1320,6 +1344,7 @@ puts "Inky's target position is (#{inky_target_x}, #{inky_target_y})"
 
     # for a corner loop over the directions skipping the current dir and it's opposite
     if args.state.inky_in_a_corner == :yes
+      args.state.inky.skip_frame = :true unless args.state.inky.pen == :yes
       case args.state.inky.dir
         when 1
         # if going up, check left and right
@@ -1422,7 +1447,6 @@ puts "Inky's target position is (#{inky_target_x}, #{inky_target_y})"
         end
       end
     end
-    args.state.inky.skip_frame = :true
   end
   args.state.inky.allowed_up = allowed_up
   args.state.inky.allowed_right = allowed_right
@@ -1519,6 +1543,13 @@ def move_clyde(args)
       args.state.clyde.x -= 1 if (move_x == 0) && (((args.state.clyde.x - 1) % 4) != 0)
   end
 
+  # stall ghost slightly in a corner, helps a tiny bit ;)
+  # if args.state.clyde_in_a_corner == :yes && args.state.clyde.skip_frame == :true && args.state.clyde.pen == :no
+  if args.state.clyde.skip_frame == :true && args.state.clyde.pen == :no
+    args.state.clyde.skip_frame = :false
+    return
+  end
+
   args.state.clyde.x += move_x
   args.state.clyde.y += move_y
 
@@ -1542,10 +1573,10 @@ def move_clyde(args)
 
   # stall ghost slightly in a corner, helps a tiny bit ;)
   # if args.state.clyde_in_a_corner == :yes && args.state.clyde.skip_frame == :true && args.state.clyde.pen == :no
-  if args.state.clyde.skip_frame == :true && args.state.clyde.pen == :no
-    args.state.clyde.skip_frame = :false
-    return
-  end
+  #if args.state.clyde.skip_frame == :true && args.state.clyde.pen == :no
+  #  args.state.clyde.skip_frame = :false
+  #  return
+  #end
 
   if (clyde_over == 3 || clyde_over == 4) && (((args.state.clyde.x - 1 ) % 4) == 0) && (((args.state.clyde.y - 2 ) % 4) == 0)
     args.state.clyde_in_a_junction = :yes
@@ -1600,6 +1631,7 @@ def move_clyde(args)
 
     # for a corner loop over the directions skipping the current dir and it's opposite
     if args.state.clyde_in_a_corner == :yes
+      args.state.clyde.skip_frame = :true unless args.state.clyde.pen == :yes
       case args.state.clyde.dir
         when 1
         # if going up, check left and right
@@ -1702,7 +1734,6 @@ def move_clyde(args)
         end
       end
     end
-    args.state.clyde.skip_frame = :true
   end
   args.state.clyde.allowed_up = allowed_up
   args.state.clyde.allowed_right = allowed_right

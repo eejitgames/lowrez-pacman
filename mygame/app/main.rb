@@ -181,6 +181,7 @@ def tick(args)
     args.state.pacman.lives = 3
     args.state.pacman.score = 0
     args.state.dots_eaten = 0
+    args.state.next_life_threshold = 10000
   end
   args.lowrez.background_color = [0, 0, 0]
   check_all_dots_eaten_blink_maze_start_new_level args
@@ -193,6 +194,7 @@ def tick(args)
     draw_blinky args
     draw_clyde args
   end
+  check_for_extra_life args
   draw_lives args
   draw_pacman args unless args.state.pacman_is_dead
   draw_pacman_death_anim args if args.state.pacman_is_dead
@@ -230,6 +232,13 @@ def tick(args)
     }
   end
   # puts60 "dots eaten: #{args.state.dots_eaten}"
+end
+
+def check_for_extra_life(args)
+  if args.state.pacman.score >= args.state.next_life_threshold
+    args.state.pacman.lives += 1
+    args.state.next_life_threshold += 10000
+  end
 end
 
 def check_all_dots_eaten_blink_maze_start_new_level(args)
@@ -2140,7 +2149,7 @@ def player_input(args)
         gain: 0.2,                   # Volume (0.0 to 1.0)
         pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
         paused: false,               # Set to true to pause the sound at the current playback position
-        looping: true                # Set to true to loop the sound/music until you stop it
+        looping: false               # Set to true to loop the sound/music until you stop it
       }
 
       # blinky
@@ -2387,6 +2396,7 @@ def draw_pacman_death_anim(args)
         args.state.pacman.score = 0
         args.state.dots_eaten = 0
         args.state.key_released = nil
+        args.state.next_life_threshold = 10000
       end
         
       # keys: {:down=>[:left_arrow, :raw_key], :held=>[], :down_or_held=>[:left_arrow, :raw_key], :up=>[]}

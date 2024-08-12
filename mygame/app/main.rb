@@ -166,12 +166,12 @@ def init(args)
   }
 
   args.state.fruits = [
-    "cherries",
-    "strawberry",
-    "orange",
-    "apple",
-    "melon",
-    "galaxian"
+    { fruit: "cherries"  , score: 100 },
+    { fruit: "strawberry", score: 300 },
+    { fruit: "orange"    , score: 500 },
+    { fruit: "apple"     , score: 700 },
+    { fruit: "melon"     , score: 1000 },
+    { fruit: "galaxian"  , score: 2000 }
   ]
 
   # args.state.dots_eaten = 0
@@ -192,8 +192,9 @@ def tick(args)
     args.state.pacman.score = 0
     args.state.dots_eaten = 0
     args.state.next_life_threshold = 10000
-    args.state.fruit = -1 # this is will be incremented to give the first fruit, cherries
+    args.state.fruit = 0 # this is the first fruit, cherries, and will be incremented as they are eaten
     args.state.fruit_target_dots = nil
+    args.state.draw_fruit = :false
   end
   args.lowrez.background_color = [0, 0, 0]
   check_all_dots_eaten_blink_maze_start_new_level args
@@ -248,53 +249,69 @@ def tick(args)
 end
 
 def fruit_handling(args)
-    # check if we should enable flags to make a fruit available
-    # The first fruit appears when Pac-Man has eaten 70 of the dots in the maze, and the second when 170 have been eaten.
-    args.state.fruit_target_dots ||= 70
-    if args.state.dots_eaten >= args.state.fruit_target_dots
-      args.state.fruit_target_dots += 100
-      args.state.draw_fruit = :true
-      args.state.fruit_timer_start = Kernel.tick_count
-      args.state.fruit += 1
+  args.state.bonus_shown ||= 0      # Number of times the bonus has been shown
+  args.state.bonus_active ||= false # Is the bonus currently active?
+  args.state.bonus_timer ||= 0      # Timer for how long the bonus is active
+
+  # Check if the bonus should start
+  if args.state.bonus_shown < 2
+    if args.state.dots_eaten >= 70 && args.state.bonus_shown == 0
+      start_bonus(args)
+    elsif args.state.dots_eaten >= 170 && args.state.bonus_shown == 1
+      start_bonus(args)
     end
+  end
 
-    args.state.draw_fruit = :false if args.state.fruit_timer_start.elapsed_time > 60 * 9 # 9 seconds
-
-    if args.state.draw_fruit == :true
-      sprite_path  = "sprites/#{args.state.fruits[args.state.fruit]}.png"
-      args.lowrez.primitives << {
-      x: (0 - args.state.pacman.mx + 1) + 67,
-      y: (0 - args.state.pacman.my) + 66,
-      w: 8,
-      h: 8,
-      path: sprite_path,
-      anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
-      anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
-      angle: 0
-      }
+  # Handle the duration of the bonus
+  if args.state.bonus_active
+    args.state.bonus_timer -= 1
+    if args.state.bonus_timer <= 0
+      end_bonus(args)
     end
-    # check flags to see if we should draw a fruit - it has a timer for long it appears
-    # cherries, strawberry,
+  end
 
+  def start_bonus(args)
+    args.state.bonus_active = true
+    args.state.bonus_timer = 9 * 60 # 9 seconds, assuming 60 frames per second
+    args.state.bonus_shown += 1
+  end
 
-    # check pacman position to eat fruit and award score
+  def end_bonus(args)
+    args.state.bonus_active = false
+  end
 
+  if args.state.bonus_active == true
+    #  args.state.fruits = [
+    # { fruit: "cherries"  , score: 100 }.
+    sprite_path  = "sprites/#{args.state.fruits[args.state.fruit].fruit}.png"
+    args.lowrez.primitives << {
+    x: (0 - args.state.pacman.mx + 1) + 67,
+    y: (0 - args.state.pacman.my) + 66,
+    w: 8,
+    h: 8,
+    path: sprite_path,
+    anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
+    anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
+    angle: 0
+    }
+    # args.state.fruits = [
+    #   { fruit: "cherries"  , score: 100 },
+    #   { fruit: "strawberry", score: 300 },
+    #   { fruit: "orange"    , score: 500 },
+    #   { fruit: "apple"     , score: 700 },
+    #   { fruit: "melon"     , score: 1000 },
+    #   { fruit: "galaxian"  , score: 2000 }
+    # ]
 
-
-
-    # sprite_path  = "sprites/blinky-#{args.state.blinky.dir}.png"
-
-    #return if args.state.cherries_awarded
-    #args.lowrez.primitives << {
-    #  x: (0 - args.state.pacman.mx + 1) + 67,
-    #  y: (0 - args.state.pacman.my) + 66,
-    #  w: 8,
-    #  h: 8,
-    #  path: sprite_path,
-    #  anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
-    #  anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
-    #  angle: 0
-    #}
+    # "pacman position in map mx, my:   #{32 + args.state.pacman.mx}, #{31 + args.state.pacman.my}"
+    if args.state.pacman.mx == 34 && args.state.pacman.my == 35
+      args.state.bonus_active = false
+      args.state.bonus_active = false # Is the bonus currently active?
+      args.state.bonus_timer = 0      # Timer for how long the bonus is active
+      args.state.pacman.score += args.state.fruits[args.state.fruit].score
+      args.state.fruit += 1 if args.state.fruit < 5
+    end
+  end
 end
 
 def check_for_extra_life(args)
@@ -312,9 +329,11 @@ def check_all_dots_eaten_blink_maze_start_new_level(args)
     # Initialize alternating_start if not already set
     args.state.alternating_start ||= args.state.tick_count
     args.state.level_complete = true
+    args.state.bonus_shown = 0
   else
     # Reset alternating_start to stop alternating if the condition is no longer met
     args.state.alternating_start = nil
+    args.state.fruit_target_dots = nil
   end
 
   # If alternating_start is set, manage the alternating logic
@@ -1934,6 +1953,7 @@ def draw_ready(args)
   args.state.pinky.entered_pen_time = Kernel.tick_count
   args.state.inky.entered_pen_time = Kernel.tick_count + 120
   args.state.clyde.entered_pen_time = Kernel.tick_count + 240
+  args.state.fruit_timer_start = Kernel.tick_count
   args.state.draw_fruit = :false
 end
 
@@ -2423,9 +2443,10 @@ def draw_pacman_death_anim(args)
     if args.state.new_level_timer.elapsed_time > 60
       args.state.new_wave = :true
       args.state.pacman.lives -= 1
+      args.state.draw_fruit = :false
       
-      args.state.game_over = :true if args.state.pacman.lives < 0 
-      
+      args.state.game_over = :true if args.state.pacman.lives < 0
+
       current_score = args.state.pacman.score
       current_lives = args.state.pacman.lives
       init args unless args.state.game_over == :true

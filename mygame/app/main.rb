@@ -89,7 +89,7 @@ def init(args)
     dir: 4,
     pen: :no,
     mode: :chase, # mode either chase or scatter
-    speed: 2,
+    speed: 3,
     skip_frame: :true,
     entered_pen_time: 0
     #offset: [
@@ -200,8 +200,8 @@ def tick(args)
   check_all_dots_eaten_blink_maze_start_new_level args
   draw_maze args if args.state.should_draw == true # draw_maze args
   draw_dots args
-  fruit_handling args
   draw_score args
+  fruit_handling args
   if args.state.should_draw == true
     draw_pinky args
     draw_inky args
@@ -426,7 +426,7 @@ end
 def exit_ghost_pen(args)
   # blinky
   if ((args.state.blinky.pen ==:yes) && (args.state.blinky.entered_pen_time.elapsed_time > 60 * 9)) # 9 seconds
-    args.state.blinky.speed = 2
+    args.state.blinky.speed = 3
     args.state.blinky.mode = :ghost_exit
     args.state.blinky.skip_frame = :true
    end
@@ -569,7 +569,7 @@ def ghost_mode(args)
   if args.state.pacman.powered_up.elapsed_time > 60 * 9 # 9 seconds
     # blinky
     unless args.state.blinky.pen == :yes || args.state.blinky.mode == :eyes
-      args.state.blinky.speed = 2
+      args.state.blinky.speed = 3
       args.state.blinky.mode = :chase
       args.state.pacman.ghost_score = 200
     end
@@ -1955,6 +1955,7 @@ def draw_ready(args)
   args.state.clyde.entered_pen_time = Kernel.tick_count + 240
   args.state.fruit_timer_start = Kernel.tick_count
   args.state.draw_fruit = :false
+  args.state.bonus_active = false # Is the bonus currently active?
 end
 
 def draw_game_over(args)
@@ -2228,10 +2229,26 @@ def player_input(args)
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 4
       args.state.pacman.score += 10
       args.state.dots_eaten += 1
+      args.audio[:small_dots] ||= {
+        input: 'sounds/wakka-wakka.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 1.0,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: false               # Set to true to loop the sound/music until you stop it
+      }
     when 5
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 6
       args.state.pacman.score += 10
       args.state.dots_eaten += 1
+      args.audio[:small_dots] ||= {
+        input: 'sounds/wakka-wakka.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 1.0,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: false               # Set to true to loop the sound/music until you stop it
+      }
     when 2
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
       args.state.pacman.score += 50

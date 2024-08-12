@@ -2213,6 +2213,17 @@ def player_input(args)
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 0
       args.state.pacman.score += 10
       args.state.dots_eaten += 1
+      # puts60 "sounds that are paused: #{args.audio.select { |_, sound| sound[:paused] == true }.length}"
+      # args.audio[:win].paused = false if args.state.ship.state == :win unless args.audio[:win].nil?
+      # args.audio[:title].playtime = 0
+      args.audio[:small_dots] ||= {
+        input: 'sounds/wakka-wakka.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 1.0,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: false               # Set to true to loop the sound/music until you stop it
+      }
     when 3
       args.state.maze[args.state.pacman.grid_y][args.state.pacman.grid_x] = 4
       args.state.pacman.score += 10
@@ -2226,15 +2237,15 @@ def player_input(args)
       args.state.pacman.score += 50
       args.state.dots_eaten += 1
       args.state.pacman.powered_up = Kernel.tick_count
-      # play the sirens, ghosts are running for their lives
-      #args.audio[rand] = {
-      #  input: 'sounds/sirens.ogg',  # Filename
-      #  x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
-      #  gain: 0.2,                   # Volume (0.0 to 1.0)
-      #  pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
-      #  paused: false,               # Set to true to pause the sound at the current playback position
-      #  looping: false               # Set to true to loop the sound/music until you stop it
-      #}
+      # play the big dot sound
+      args.audio[rand] = {
+        input: 'sounds/big-dot.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 1.0,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: false               # Set to true to loop the sound/music until you stop it
+      }
 
       # blinky
       unless args.state.blinky.mode ==:eyes || args.state.blinky.pen == :yes
@@ -2264,15 +2275,15 @@ def player_input(args)
       args.state.pacman.score += 50
       args.state.dots_eaten += 1
       args.state.pacman.powered_up = Kernel.tick_count
-      # play the sirens, ghosts are running for their lives
-      #args.audio[rand] = {
-      #  input: 'sounds/sirens.ogg',  # Filename
-      #  x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
-      #  gain: 0.2,                   # Volume (0.0 to 1.0)
-      #  pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
-      #  paused: false,               # Set to true to pause the sound at the current playback position
-      #  looping: false                # Set to true to loop the sound/music until you stop it
-      #}
+      # play the big dot sound
+      args.audio[rand] = {
+        input: 'sounds/big-dot.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 0.2,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: false                # Set to true to loop the sound/music until you stop it
+      }
 
       # blinky
       unless args.state.blinky.mode ==:eyes || args.state.blinky.pen == :yes
@@ -2483,6 +2494,9 @@ def draw_pacman_death_anim(args)
         args.state.key_released = nil
         args.state.next_life_threshold = 10000
         args.state.fruit_target_dots = nil
+        args.state.bonus_shown = nil
+        args.state.bonus_active = nil
+        args.state.bonus_timer = nil
       end
         
       # keys: {:down=>[:left_arrow, :raw_key], :held=>[], :down_or_held=>[:left_arrow, :raw_key], :up=>[]}

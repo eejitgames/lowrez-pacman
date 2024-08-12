@@ -2220,7 +2220,7 @@ def player_input(args)
       args.audio[:small_dots] ||= {
         input: 'sounds/wakka-wakka.ogg',  # Filename
         x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
-        gain: 1.0,                   # Volume (0.0 to 1.0)
+        gain: 0.9,                   # Volume (0.0 to 1.0)
         pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
         paused: false,               # Set to true to pause the sound at the current playback position
         looping: false               # Set to true to loop the sound/music until you stop it
@@ -2232,7 +2232,7 @@ def player_input(args)
       args.audio[:small_dots] ||= {
         input: 'sounds/wakka-wakka.ogg',  # Filename
         x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
-        gain: 1.0,                   # Volume (0.0 to 1.0)
+        gain: 0.9,                   # Volume (0.0 to 1.0)
         pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
         paused: false,               # Set to true to pause the sound at the current playback position
         looping: false               # Set to true to loop the sound/music until you stop it
@@ -2244,7 +2244,7 @@ def player_input(args)
       args.audio[:small_dots] ||= {
         input: 'sounds/wakka-wakka.ogg',  # Filename
         x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
-        gain: 1.0,                   # Volume (0.0 to 1.0)
+        gain: 0.9,                   # Volume (0.0 to 1.0)
         pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
         paused: false,               # Set to true to pause the sound at the current playback position
         looping: false               # Set to true to loop the sound/music until you stop it
@@ -2296,7 +2296,7 @@ def player_input(args)
       args.audio[rand] = {
         input: 'sounds/big-dot.ogg',  # Filename
         x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
-        gain: 0.2,                   # Volume (0.0 to 1.0)
+        gain: 1.0,                   # Volume (0.0 to 1.0)
         pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
         paused: false,               # Set to true to pause the sound at the current playback position
         looping: false                # Set to true to loop the sound/music until you stop it

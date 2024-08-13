@@ -195,6 +195,7 @@ def tick(args)
     args.state.fruit = 0 # this is the first fruit, cherries, and will be incremented as they are eaten
     args.state.fruit_target_dots = nil
     args.state.draw_fruit = :false
+    args.state.game_start = :true
   end
   args.lowrez.background_color = [0, 0, 0]
   check_all_dots_eaten_blink_maze_start_new_level args
@@ -1950,6 +1951,19 @@ def draw_ready(args)
     a: 255,
     font: LOWREZ_FONT_PATH
   }
+
+    if args.state.game_start == :true
+    args.audio[:game_start] ||= {
+      input: 'sounds/game-start.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 0.9,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: false               # Set to true to loop the sound/music until you stop it
+    }
+    args.state.game_start = :false
+  end
+
   args.state.pinky.entered_pen_time = Kernel.tick_count
   args.state.inky.entered_pen_time = Kernel.tick_count + 120
   args.state.clyde.entered_pen_time = Kernel.tick_count + 240
@@ -1974,6 +1988,8 @@ def draw_game_over(args)
   args.state.pinky.entered_pen_time = Kernel.tick_count
   args.state.inky.entered_pen_time = Kernel.tick_count + 120
   args.state.clyde.entered_pen_time = Kernel.tick_count + 240
+  args.state.game_start = :true
+  args.state.fruit = 0
 end
 
 

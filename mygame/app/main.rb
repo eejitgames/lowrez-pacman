@@ -748,24 +748,56 @@ def check_pacman_hit_status(args)
     unless args.state.pacman_is_dead == true
       args.state.pacman_is_dead = true 
       args.state.death_start = Kernel.tick_count
+      args.audio[:lifelost] ||= {
+      input: 'sounds/lose-life.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 0.8,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: false               # Set to true to loop the sound/music until you stop it
+    }
     end
   end
   if args.state.pacman.grid_x == args.state.pinky.grid_x && args.state.pacman.grid_y == args.state.pinky.grid_y && args.state.pinky.mode == :chase
     unless args.state.pacman_is_dead == true
       args.state.pacman_is_dead = true
       args.state.death_start = Kernel.tick_count
+      args.audio[:lifelost] ||= {
+      input: 'sounds/lose-life.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 0.8,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: false               # Set to true to loop the sound/music until you stop it
+    }
     end
   end
   if args.state.pacman.grid_x == args.state.inky.grid_x && args.state.pacman.grid_y == args.state.inky.grid_y && args.state.inky.mode == :chase
     unless args.state.pacman_is_dead == true
       args.state.pacman_is_dead = true
       args.state.death_start = Kernel.tick_count
+      args.audio[:lifelost] ||= {
+      input: 'sounds/lose-life.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 0.8,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: false               # Set to true to loop the sound/music until you stop it
+    }
     end
   end
   if args.state.pacman.grid_x == args.state.clyde.grid_x && args.state.pacman.grid_y == args.state.clyde.grid_y && args.state.clyde.mode == :chase
     unless args.state.pacman_is_dead == true
       args.state.pacman_is_dead = true
       args.state.death_start = Kernel.tick_count
+      args.audio[:lifelost] ||= {
+      input: 'sounds/lose-life.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 0.8,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: false               # Set to true to loop the sound/music until you stop it
+    }
     end
   end
 end
@@ -2622,7 +2654,7 @@ def draw_pacman_death_anim(args)
   # args.state.pacman.anim = :no if args.state.level_complete == true
   if args.state.pacman_is_dead == true
     sprite_index = args.state.death_start.frame_index count: 12,     # how many sprites?
-                                                     hold_for: 9,   # how long to hold each sprite?
+                                                     hold_for: 7,   # how long to hold each sprite?
                                                       repeat: false  # should it repeat?
   #args.state.pacman.frame = sprite_index
   #else

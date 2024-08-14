@@ -294,6 +294,16 @@ def draw_fruit_bonus_score(args)
   end
 end
 
+def start_bonus(args)
+  args.state.bonus_active = true
+  args.state.bonus_timer = 9 * 60 # 9 seconds, assuming 60 frames per second
+  args.state.bonus_shown += 1
+end
+
+def end_bonus(args)
+  args.state.bonus_active = false
+end
+
 def fruit_handling(args)
   args.state.bonus_shown ||= 0      # Number of times the bonus has been shown
   args.state.bonus_active ||= false # Is the bonus currently active?
@@ -315,7 +325,7 @@ def fruit_handling(args)
       end_bonus(args)
     end
   end
-
+=begin
   def start_bonus(args)
     args.state.bonus_active = true
     args.state.bonus_timer = 9 * 60 # 9 seconds, assuming 60 frames per second
@@ -325,7 +335,7 @@ def fruit_handling(args)
   def end_bonus(args)
     args.state.bonus_active = false
   end
-
+=end
   if args.state.bonus_active == true
     #  args.state.fruits = [
     # { fruit: "cherries"  , score: 100 }.
@@ -1273,7 +1283,7 @@ def draw_dots(args)
   #  row.each_with_index do |value, col_index|
       if value == 1 || value == 3 || value == 5
         args.lowrez.primitives << {
-          x: (col * 4 - args.state.pacman.mx) + 1,       # x: (col_index * 4 - args.state.pacman.mx) + 1,
+          x: (col * 4 - args.state.pacman.mx) + 1, # x: (col_index * 4 - args.state.pacman.mx) + 1,
           y: (row * 4 - args.state.pacman.my) + 2, # y: (row_index * 4 - args.state.pacman.my) + 2,
           w: 1,
           h: 1,

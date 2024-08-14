@@ -247,7 +247,6 @@ def tick(args)
     }
   end
   # puts60 "dots eaten: #{args.state.dots_eaten}"
-  # draw_fruit_bonus_score args
 end
 
 def draw_fruit_bonus_score(args)
@@ -255,7 +254,7 @@ def draw_fruit_bonus_score(args)
   args.state.fruit_popup_score ||= {
     x: 0,
     y: 0,
-    w: 8,
+    w: 24,
     h: 8,
     path: "sprites/cherries-bonus.png",
     anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
@@ -263,25 +262,7 @@ def draw_fruit_bonus_score(args)
     angle: 0,
     eaten_at: 0
   }
-  
-=begin
-    sprite_path  = "sprites/#{args.state.fruits[args.state.fruit].fruit}.png"
-    args.lowrez.primitives << {
-    x: (0 - args.state.pacman.mx + 1) + 67,
-    y: (0 - args.state.pacman.my) + 66,
-    w: 8,
-    h: 8,
-    path: sprite_path,
-    anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
-    anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
-    angle: 0
-    }
-    
-    x: args.state.pacman[:x] + args.state.pacman.offset[args.state.pacman.dir].x,
-    y: args.state.pacman[:y] + args.state.pacman.offset[args.state.pacman.dir].y,
-=end
-  
-  #putz "size of Q: #{args.state.render_queue.size}"
+
   args.state.render_queue.reject! { |i| i.expired }
   
   args.state.render_queue.each do |i|
@@ -367,12 +348,12 @@ def fruit_handling(args)
       args.state.pacman.score += args.state.fruits[args.state.fruit].score
       
       args.state.fruit_popup_score.eaten_at = Kernel.tick_count
-      # args.state.fruit_popup_score.path = "sprites/#{args.state.fruits[args.state.fruit].fruit}-bonus.png"
-      args.state.fruit_popup_score.path = "sprites/galaxian-bonus.png"
+      args.state.fruit_popup_score.path = "sprites/#{args.state.fruits[args.state.fruit].fruit}-bonus.png"
       args.state.render_queue << args.state.fruit_popup_score.dup
       args.state.fruit += 1 if args.state.fruit < 5
     end
   end
+  draw_fruit_bonus_score args
 end
 
 def check_for_extra_life(args)
@@ -1999,7 +1980,7 @@ def draw_ready(args)
     font: LOWREZ_FONT_PATH
   }
 
-    if args.state.game_start == :true
+  if args.state.game_start == :true
     args.audio[:game_start] ||= {
       input: 'sounds/game-start.ogg',  # Filename
       x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
@@ -2017,6 +1998,7 @@ def draw_ready(args)
   args.state.fruit_timer_start = Kernel.tick_count
   args.state.draw_fruit = :false
   args.state.bonus_active = false # Is the bonus currently active?
+  stop_sounds args
 end
 
 def draw_game_over(args)

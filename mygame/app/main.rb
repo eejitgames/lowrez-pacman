@@ -247,7 +247,7 @@ def tick(args)
     }
   end
   # puts60 "dots eaten: #{args.state.dots_eaten}"
-  draw_fruit_bonus_score args
+  # draw_fruit_bonus_score args
 end
 
 def draw_fruit_bonus_score(args)
@@ -255,7 +255,7 @@ def draw_fruit_bonus_score(args)
   args.state.fruit_popup_score ||= {
     x: 0,
     y: 0,
-    w: 24,
+    w: 8,
     h: 8,
     path: "sprites/cherries-bonus.png",
     anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
@@ -357,7 +357,8 @@ def fruit_handling(args)
       args.state.pacman.score += args.state.fruits[args.state.fruit].score
       
       args.state.fruit_popup_score.eaten_at = Kernel.tick_count
-      args.state.fruit_popup_score.path = "sprites/#{args.state.fruits[args.state.fruit].fruit}-bonus.png"
+      # args.state.fruit_popup_score.path = "sprites/#{args.state.fruits[args.state.fruit].fruit}-bonus.png"
+      args.state.fruit_popup_score.path = "sprites/galaxian-bonus.png"
       args.state.render_queue << args.state.fruit_popup_score.dup
       args.state.fruit += 1 if args.state.fruit < 5
     end

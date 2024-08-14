@@ -425,11 +425,22 @@ def check_all_dots_eaten_blink_maze_start_new_level(args)
       args.state.pacman.lives = current_lives
       args.state.pacman.score = current_score
       args.state.dots_eaten = current_dots
+      # stop sounds
+      stop_sounds args
     end
   else
     # Normal behavior: call draw_me every frame
     args.state.should_draw = true
   end
+end
+
+def stop_sounds(args)
+  args.audio[:small_dots] = nil
+  args.audio[:siren] = nil
+  args.audio[:blinky] = nil
+  args.audio[:pinky] = nil
+  args.audio[:inky] = nil
+  args.audio[:clyde] = nil
 end
 
 def check_ghosts(args)

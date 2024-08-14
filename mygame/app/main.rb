@@ -183,6 +183,7 @@ end
 
 def reset(args)
   args.state.pacman_is_dead = nil
+  @show_ghost_bonus = nil
 end
 
 def tick(args)
@@ -203,6 +204,7 @@ def tick(args)
   draw_dots args
   draw_score args
   fruit_handling args
+  ghost_bonus_handling args
   if args.state.should_draw == true
     draw_pinky args
     draw_inky args
@@ -249,7 +251,17 @@ def tick(args)
   # puts60 "dots eaten: #{args.state.dots_eaten}"
 end
 
-def draw_fruit_bonus_score(args)
+def ghost_bonus_handling(args)
+  if @show_ghost_bonus
+    args.state.ghost_popup_score.x = ((0 - args.state.pacman.mx + 1) + args.state.ghost_popup_score.ox) + 1
+    args.state.ghost_popup_score.y = ((0 - args.state.pacman.my) + args.state.ghost_popup_score.oy)
+    args.lowrez.primitives << args.state.ghost_popup_score
+    
+    @show_ghost_bonus = nil if args.state.ghost_popup_score.eaten_at.elapsed_time > 60
+  end
+end
+
+def draw_fruit_bonus_score(args, lifetime = 180)
   args.state.render_queue ||= []
   args.state.fruit_popup_score ||= {
     x: 0,
@@ -266,7 +278,7 @@ def draw_fruit_bonus_score(args)
   args.state.render_queue.reject! { |i| i.expired }
   
   args.state.render_queue.each do |i|
-    i.expired = true if i.eaten_at.elapsed_time > 60 * 3 # 3 seconds
+    i.expired = true if i.eaten_at.elapsed_time > lifetime # default 3 seconds
     # putz "elapsed #{i.eaten_at.elapsed_time}"
     i.x = ((0 - args.state.pacman.mx + 1) + 67) + 1 # + args.state.pacman.offset[args.state.pacman.dir].x
     i.y = ((0 - args.state.pacman.my) + 66)     # + args.state.pacman.offset[args.state.pacman.dir].y
@@ -560,7 +572,7 @@ def check_pacman_hit_status(args)
   if args.state.pacman.grid_x == args.state.blinky.grid_x && args.state.pacman.grid_y == args.state.blinky.grid_y && args.state.blinky.mode == :scatter
     args.state.pacman.score += args.state.pacman.ghost_score
     # putz "added: #{args.state.pacman.ghost_score}"
-    args.state.pacman.ghost_score *= 2
+    # args.state.pacman.ghost_score *= 2
     args.state.blinky.mode = :eyes
     args.state.blinky.target_x = 16
     args.state.blinky.target_y = 22
@@ -580,14 +592,29 @@ def check_pacman_hit_status(args)
       pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
       paused: false,               # Set to true to pause the sound at the current playback position
       looping: false               # Set to true to loop the sound/music until you stop it
-    }  
+    }
+    args.state.ghost_popup_score = {
+      ox: args.state.blinky.x, # need to capture where he was at that point
+      oy: args.state.blinky.y,
+      x: ((0 - args.state.pacman.mx + 1) + args.state.blinky.x) + 1,
+      y: ((0 - args.state.pacman.my) + args.state.blinky.y),
+      w: 24,
+      h: 8,
+      path: "sprites/#{args.state.pacman.ghost_score}-bonus.png",
+      anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
+      anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
+      angle: 0,
+      eaten_at: Kernel.tick_count
+    }
+    @show_ghost_bonus = :true
+    args.state.pacman.ghost_score *= 2      
   end
 
   # check if hit pinky
   if args.state.pacman.grid_x == args.state.pinky.grid_x && args.state.pacman.grid_y == args.state.pinky.grid_y && args.state.pinky.mode == :scatter
     args.state.pacman.score += args.state.pacman.ghost_score
     # putz "added: #{args.state.pacman.ghost_score}"
-    args.state.pacman.ghost_score *= 2
+    # args.state.pacman.ghost_score *= 2
     args.state.pinky.mode = :eyes
     args.state.pinky.target_x = 16
     args.state.pinky.target_y = 22
@@ -608,13 +635,28 @@ def check_pacman_hit_status(args)
       paused: false,               # Set to true to pause the sound at the current playback position
       looping: false               # Set to true to loop the sound/music until you stop it
     }
+    args.state.ghost_popup_score = {
+      ox: args.state.pinky.x, # need to capture where he was at that point
+      oy: args.state.pinky.y,
+      x: ((0 - args.state.pacman.mx + 1) + args.state.pinky.x) + 1,
+      y: ((0 - args.state.pacman.my) + args.state.pinky.y),
+      w: 24,
+      h: 8,
+      path: "sprites/#{args.state.pacman.ghost_score}-bonus.png",
+      anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
+      anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
+      angle: 0,
+      eaten_at: Kernel.tick_count
+    }
+    @show_ghost_bonus = :true
+    args.state.pacman.ghost_score *= 2      
   end
 
   # check if hit inky
   if args.state.pacman.grid_x == args.state.inky.grid_x && args.state.pacman.grid_y == args.state.inky.grid_y && args.state.inky.mode == :scatter
     args.state.pacman.score += args.state.pacman.ghost_score
     # putz "added: #{args.state.pacman.ghost_score}"
-    args.state.pacman.ghost_score *= 2
+    # args.state.pacman.ghost_score *= 2
     args.state.inky.mode = :eyes
     args.state.inky.target_x = 16
     args.state.inky.target_y = 22
@@ -635,13 +677,28 @@ def check_pacman_hit_status(args)
       paused: false,               # Set to true to pause the sound at the current playback position
       looping: false               # Set to true to loop the sound/music until you stop it
     }
+    args.state.ghost_popup_score = {
+      ox: args.state.inky.x, # need to capture where he was at that point
+      oy: args.state.inky.y,
+      x: ((0 - args.state.pacman.mx + 1) + args.state.inky.x) + 1,
+      y: ((0 - args.state.pacman.my) + args.state.inky.y),
+      w: 24,
+      h: 8,
+      path: "sprites/#{args.state.pacman.ghost_score}-bonus.png",
+      anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
+      anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
+      angle: 0,
+      eaten_at: Kernel.tick_count
+    }
+    @show_ghost_bonus = :true
+    args.state.pacman.ghost_score *= 2
   end
 
   # check if hit clyde
   if args.state.pacman.grid_x == args.state.clyde.grid_x && args.state.pacman.grid_y == args.state.clyde.grid_y && args.state.clyde.mode == :scatter
     args.state.pacman.score += args.state.pacman.ghost_score
     # putz "added: #{args.state.pacman.ghost_score}"
-    args.state.pacman.ghost_score *= 2
+    # args.state.pacman.ghost_score *= 2
     args.state.clyde.mode = :eyes
     args.state.clyde.target_x = 16
     args.state.clyde.target_y = 22
@@ -662,6 +719,21 @@ def check_pacman_hit_status(args)
       paused: false,               # Set to true to pause the sound at the current playback position
       looping: false               # Set to true to loop the sound/music until you stop it
     }
+    args.state.ghost_popup_score = {
+      ox: args.state.clyde.x, # need to capture where he was at that point
+      oy: args.state.clyde.y,
+      x: ((0 - args.state.pacman.mx + 1) + args.state.clyde.x) + 1,
+      y: ((0 - args.state.pacman.my) + args.state.clyde.y),
+      w: 24,
+      h: 8,
+      path: "sprites/#{args.state.pacman.ghost_score}-bonus.png",
+      anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
+      anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
+      angle: 0,
+      eaten_at: Kernel.tick_count
+    }
+    @show_ghost_bonus = :true
+    args.state.pacman.ghost_score *= 2
   end
 
   if args.state.pacman.grid_x == args.state.blinky.grid_x && args.state.pacman.grid_y == args.state.blinky.grid_y && args.state.blinky.mode == :chase

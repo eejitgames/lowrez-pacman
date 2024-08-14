@@ -347,6 +347,15 @@ def fruit_handling(args)
       args.state.bonus_timer = 0      # Timer for how long the bonus is active
       args.state.pacman.score += args.state.fruits[args.state.fruit].score
       
+      args.audio[:fruit] ||= {
+        input: 'sounds/eat-fruit.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 1.0,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: false               # Set to true to loop the sound/music until you stop it
+      }
+      
       args.state.fruit_popup_score.eaten_at = Kernel.tick_count
       args.state.fruit_popup_score.path = "sprites/#{args.state.fruits[args.state.fruit].fruit}-bonus.png"
       args.state.render_queue << args.state.fruit_popup_score.dup
@@ -557,13 +566,21 @@ def check_pacman_hit_status(args)
     args.state.blinky.target_y = 22
     args.state.blinky.speed = 1
     args.audio[:blinky] = {
-        input: 'sounds/ghost-eyes.ogg',  # Filename
-        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
-        gain: 1.0,                   # Volume (0.0 to 1.0)
-        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
-        paused: false,               # Set to true to pause the sound at the current playback position
-        looping: true               # Set to true to loop the sound/music until you stop it
-      }
+      input: 'sounds/ghost-eyes.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 1.0,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: true               # Set to true to loop the sound/music until you stop it
+    }
+    args.audio[rand] = {
+      input: 'sounds/eat-ghost.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 1.0,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: false               # Set to true to loop the sound/music until you stop it
+    }  
   end
 
   # check if hit pinky
@@ -576,13 +593,21 @@ def check_pacman_hit_status(args)
     args.state.pinky.target_y = 22
     args.state.pinky.speed = 1
     args.audio[:pinky] = {
-        input: 'sounds/ghost-eyes.ogg',  # Filename
-        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
-        gain: 1.0,                   # Volume (0.0 to 1.0)
-        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
-        paused: false,               # Set to true to pause the sound at the current playback position
-        looping: true               # Set to true to loop the sound/music until you stop it
-      }
+      input: 'sounds/ghost-eyes.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 1.0,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: true               # Set to true to loop the sound/music until you stop it
+    }
+    args.audio[rand] = {
+      input: 'sounds/eat-ghost.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 1.0,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: false               # Set to true to loop the sound/music until you stop it
+    }
   end
 
   # check if hit inky
@@ -595,13 +620,21 @@ def check_pacman_hit_status(args)
     args.state.inky.target_y = 22
     args.state.inky.speed = 1
     args.audio[:inky] = {
-        input: 'sounds/ghost-eyes.ogg',  # Filename
-        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
-        gain: 1.0,                   # Volume (0.0 to 1.0)
-        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
-        paused: false,               # Set to true to pause the sound at the current playback position
-        looping: true               # Set to true to loop the sound/music until you stop it
-      }
+      input: 'sounds/ghost-eyes.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 1.0,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: true               # Set to true to loop the sound/music until you stop it
+    }
+    args.audio[rand] = {
+      input: 'sounds/eat-ghost.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 1.0,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: false               # Set to true to loop the sound/music until you stop it
+    }
   end
 
   # check if hit clyde
@@ -614,13 +647,21 @@ def check_pacman_hit_status(args)
     args.state.clyde.target_y = 22
     args.state.clyde.speed = 1
     args.audio[:clyde] = {
-        input: 'sounds/ghost-eyes.ogg',  # Filename
-        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
-        gain: 1.0,                   # Volume (0.0 to 1.0)
-        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
-        paused: false,               # Set to true to pause the sound at the current playback position
-        looping: true               # Set to true to loop the sound/music until you stop it
-      }
+      input: 'sounds/ghost-eyes.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 1.0,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: true               # Set to true to loop the sound/music until you stop it
+    }
+    args.audio[rand] = {
+      input: 'sounds/eat-ghost.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 1.0,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: false               # Set to true to loop the sound/music until you stop it
+    }
   end
 
   if args.state.pacman.grid_x == args.state.blinky.grid_x && args.state.pacman.grid_y == args.state.blinky.grid_y && args.state.blinky.mode == :chase

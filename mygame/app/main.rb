@@ -1261,28 +1261,16 @@ def move_pinky(args)
 end
 
 def draw_dots(args)
-  # rectangle_height = 29
-  # rectangle_width = 26
-  # array_height = 37 # args.state.maze.size
-  # array_width = 34 # args.state.maze[0].size
-
-  # start_row = 4 # (array_height - rectangle_height) / 2
-  # end_row = 32 # start_row + rectangle_height - 1
-  # start_col = 4 # (array_width - rectangle_width) / 2
-  # end_col = 29 # start_col + rectangle_width - 1
-
-  # (start_row..end_row).each do |row|
-  #   (start_col..end_col).each do |col|
-
-  dots_to_draw = []
+  @dots_to_draw = []
 
   (4..32).each do |row|
     (4..29).each do |col|
 
+
       value = args.state.maze[row][col]
 
       if value == 1 || value == 3 || value == 5
-        dots_to_draw << {
+        @dots_to_draw << {
           x: (col * 4 - args.state.pacman.mx) + 1, # x: (col_index * 4 - args.state.pacman.mx) + 1,
           y: (row * 4 - args.state.pacman.my) + 2, # y: (row_index * 4 - args.state.pacman.my) + 2,
           w: 1,
@@ -1294,7 +1282,7 @@ def draw_dots(args)
           path: :pixel
         }
       elsif value == 2 || value == 7
-        dots_to_draw << {
+        @dots_to_draw << {
           x: (col * 4 - args.state.pacman.mx),     # x: (col_index * 4 - args.state.pacman.mx),
           y: (row * 4 - args.state.pacman.my) + 1, # y: (row_index * 4 - args.state.pacman.my) + 1,
           w: 3,
@@ -1306,38 +1294,9 @@ def draw_dots(args)
           path: :pixel
         }
       end
-=begin
-  #args.state.maze.each_with_index do |row, row_index|
-  #  row.each_with_index do |value, col_index|
-      if value == 1 || value == 3 || value == 5
-        args.lowrez.primitives << {
-          x: (col * 4 - args.state.pacman.mx) + 1, # x: (col_index * 4 - args.state.pacman.mx) + 1,
-          y: (row * 4 - args.state.pacman.my) + 2, # y: (row_index * 4 - args.state.pacman.my) + 2,
-          w: 1,
-          h: 1,
-          r: 255,
-          g: 183,
-          b: 255,
-          a: 160,
-          path: :pixel
-        }
-      elsif value == 2 || value == 7
-        args.lowrez.primitives << {
-          x: (col * 4 - args.state.pacman.mx),     # x: (col_index * 4 - args.state.pacman.mx),
-          y: (row * 4 - args.state.pacman.my) + 1, # y: (row_index * 4 - args.state.pacman.my) + 1,
-          w: 3,
-          h: 3,
-          r: 0xFF,
-          g: 183,
-          b: 0xFF,
-          a: 160,
-          path: :pixel
-        }
-      end
-=end
     end
   end
-  args.lowrez.primitives << dots_to_draw
+  args.lowrez.primitives << @dots_to_draw
 end
 
 def move_inky(args)
@@ -1980,56 +1939,6 @@ def move_clyde(args)
       args.state.clyde.target_x = 15 # a square north of the pen exit
       args.state.clyde.target_y = 25
       args.audio[:clyde] = nil
-    end
-  end
-end
-
-def draw_dots(args)
-  # rectangle_height = 29
-  # rectangle_width = 26
-  # array_height = 37 # args.state.maze.size
-  # array_width = 34 # args.state.maze[0].size
-
-  # start_row = 4 # (array_height - rectangle_height) / 2
-  # end_row = 32 # start_row + rectangle_height - 1
-  # start_col = 4 # (array_width - rectangle_width) / 2
-  # end_col = 29 # start_col + rectangle_width - 1
-
-  # (start_row..end_row).each do |row|
-  #   (start_col..end_col).each do |col|
-
-  (4..32).each do |row|
-    (4..29).each do |col|
-
-      value = args.state.maze[row][col]
-
-  #args.state.maze.each_with_index do |row, row_index|
-  #  row.each_with_index do |value, col_index|
-      if value == 1 || value == 3 || value == 5
-        args.lowrez.primitives << {
-          x: (col * 4 - args.state.pacman.mx) + 1,       # x: (col_index * 4 - args.state.pacman.mx) + 1,
-          y: (row * 4 - args.state.pacman.my) + 2, # y: (row_index * 4 - args.state.pacman.my) + 2,
-          w: 1,
-          h: 1,
-          r: 255,
-          g: 183,
-          b: 255,
-          a: 160,
-          path: :pixel
-        }
-      elsif value == 2 || value == 7
-        args.lowrez.primitives << {
-          x: (col * 4 - args.state.pacman.mx),     # x: (col_index * 4 - args.state.pacman.mx),
-          y: (row * 4 - args.state.pacman.my) + 1, # y: (row_index * 4 - args.state.pacman.my) + 1,
-          w: 3,
-          h: 3,
-          r: 0xFF,
-          g: 183,
-          b: 0xFF,
-          a: 160,
-          path: :pixel
-        }
-      end
     end
   end
 end

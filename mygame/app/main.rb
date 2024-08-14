@@ -554,6 +554,14 @@ def check_pacman_hit_status(args)
     args.state.blinky.target_x = 16
     args.state.blinky.target_y = 22
     args.state.blinky.speed = 1
+    args.audio[:blinky] = {
+        input: 'sounds/ghost-eyes.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 1.0,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: true               # Set to true to loop the sound/music until you stop it
+      }
   end
 
   # check if hit pinky
@@ -565,6 +573,14 @@ def check_pacman_hit_status(args)
     args.state.pinky.target_x = 16
     args.state.pinky.target_y = 22
     args.state.pinky.speed = 1
+    args.audio[:pinky] = {
+        input: 'sounds/ghost-eyes.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 1.0,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: true               # Set to true to loop the sound/music until you stop it
+      }
   end
 
   # check if hit inky
@@ -576,6 +592,14 @@ def check_pacman_hit_status(args)
     args.state.inky.target_x = 16
     args.state.inky.target_y = 22
     args.state.inky.speed = 1
+    args.audio[:inky] = {
+        input: 'sounds/ghost-eyes.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 1.0,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: true               # Set to true to loop the sound/music until you stop it
+      }
   end
 
   # check if hit clyde
@@ -587,6 +611,14 @@ def check_pacman_hit_status(args)
     args.state.clyde.target_x = 16
     args.state.clyde.target_y = 22
     args.state.clyde.speed = 1
+    args.audio[:clyde] = {
+        input: 'sounds/ghost-eyes.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 1.0,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: true               # Set to true to loop the sound/music until you stop it
+      }
   end
 
   if args.state.pacman.grid_x == args.state.blinky.grid_x && args.state.pacman.grid_y == args.state.blinky.grid_y && args.state.blinky.mode == :chase
@@ -645,6 +677,7 @@ def ghost_mode(args)
       args.state.clyde.mode = :chase
       args.state.pacman.ghost_score = 200
     end
+    args.audio[:siren] = nil
   end
 end
 
@@ -919,6 +952,7 @@ def move_blinky(args)
       args.state.blinky.entered_pen_time = Kernel.tick_count
       args.state.blinky.target_x = 15 # a square north of the pen exit
       args.state.blinky.target_y = 25
+      args.audio[:blinky] = nil
     end
   end
 end
@@ -1211,6 +1245,7 @@ def move_pinky(args)
       args.state.pinky.entered_pen_time = Kernel.tick_count
       args.state.pinky.target_x = 15 # a square north of the pen exit
       args.state.pinky.target_y = 25
+      args.audio[:pinky] = nil
     end
   end
 end
@@ -1616,6 +1651,7 @@ puts "Inky's target position is (#{inky_target_x}, #{inky_target_y})"
       args.state.inky.entered_pen_time = Kernel.tick_count
       args.state.inky.target_x = 15 # a square north of the pen exit
       args.state.inky.target_y = 25
+      args.audio[:inky] = nil
     end
   end
 end
@@ -1903,6 +1939,7 @@ def move_clyde(args)
       args.state.clyde.entered_pen_time = Kernel.tick_count
       args.state.clyde.target_x = 15 # a square north of the pen exit
       args.state.clyde.target_y = 25
+      args.audio[:clyde] = nil
     end
   end
 end
@@ -2329,6 +2366,14 @@ def player_input(args)
         paused: false,               # Set to true to pause the sound at the current playback position
         looping: false               # Set to true to loop the sound/music until you stop it
       }
+      args.audio[:siren] = {
+        input: 'sounds/ghost-siren.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 0.6,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: true               # Set to true to loop the sound/music until you stop it
+      }
 
       # blinky
       unless args.state.blinky.mode ==:eyes || args.state.blinky.pen == :yes
@@ -2366,6 +2411,14 @@ def player_input(args)
         pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
         paused: false,               # Set to true to pause the sound at the current playback position
         looping: false                # Set to true to loop the sound/music until you stop it
+      }
+      args.audio[:siren] = {
+        input: 'sounds/ghost-siren.ogg',  # Filename
+        x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+        gain: 0.6,                   # Volume (0.0 to 1.0)
+        pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+        paused: false,               # Set to true to pause the sound at the current playback position
+        looping: true               # Set to true to loop the sound/music until you stop it
       }
 
       # blinky

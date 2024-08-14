@@ -381,6 +381,14 @@ def check_for_extra_life(args)
   if args.state.pacman.score >= args.state.next_life_threshold
     args.state.pacman.lives += 1
     args.state.next_life_threshold += 10000
+    args.audio[rand] = {
+      input: 'sounds/gain-life.ogg',  # Filename
+      x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
+      gain: 0.8,                   # Volume (0.0 to 1.0)
+      pitch: 1.0,                  # Pitch of the sound (1.0 = original pitch)
+      paused: false,               # Set to true to pause the sound at the current playback position
+      looping: false               # Set to true to loop the sound/music until you stop it
+    }
   end
 end
 

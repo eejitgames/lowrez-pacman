@@ -266,7 +266,7 @@ def draw_fruit_bonus_score(args)
   args.state.render_queue.reject! { |i| i.expired }
   
   args.state.render_queue.each do |i|
-    i.expired = true if i.eaten_at.elapsed_time > 60 * 9 # 9 seconds
+    i.expired = true if i.eaten_at.elapsed_time > 60 * 3 # 3 seconds
     # putz "elapsed #{i.eaten_at.elapsed_time}"
     i.x = ((0 - args.state.pacman.mx + 1) + 67) + 1 # + args.state.pacman.offset[args.state.pacman.dir].x
     i.y = ((0 - args.state.pacman.my) + 66)     # + args.state.pacman.offset[args.state.pacman.dir].y

@@ -188,7 +188,7 @@ end
 
 def tick(args)
   if Kernel.tick_count.zero?
-    init args 
+    init args
     args.state.pacman.lives = 3
     args.state.pacman.score = 0
     args.state.dots_eaten = 0
@@ -256,7 +256,7 @@ def ghost_bonus_handling(args)
     args.state.ghost_popup_score.x = ((0 - args.state.pacman.mx + 1) + args.state.ghost_popup_score.ox) + 1
     args.state.ghost_popup_score.y = ((0 - args.state.pacman.my) + args.state.ghost_popup_score.oy)
     args.lowrez.primitives << args.state.ghost_popup_score
-    
+
     @show_ghost_bonus = nil if args.state.ghost_popup_score.eaten_at.elapsed_time > 60
   end
 end
@@ -276,7 +276,7 @@ def draw_fruit_bonus_score(args, lifetime = 180)
   }
 
   args.state.render_queue.reject! { |i| i.expired }
-  
+
   args.state.render_queue.each do |i|
     i.expired = true if i.eaten_at.elapsed_time > lifetime # default 3 seconds
     # putz "elapsed #{i.eaten_at.elapsed_time}"
@@ -358,7 +358,7 @@ def fruit_handling(args)
       args.state.bonus_active = false # Is the bonus currently active?
       args.state.bonus_timer = 0      # Timer for how long the bonus is active
       args.state.pacman.score += args.state.fruits[args.state.fruit].score
-      
+
       args.audio[:fruit] ||= {
         input: 'sounds/eat-fruit.ogg',  # Filename
         x: 0.0, y: 0.0, z: 0.0,      # Relative position to the listener, x, y, z from -1.0 to 1.0
@@ -367,7 +367,7 @@ def fruit_handling(args)
         paused: false,               # Set to true to pause the sound at the current playback position
         looping: false               # Set to true to loop the sound/music until you stop it
       }
-      
+
       args.state.fruit_popup_score.eaten_at = Kernel.tick_count
       args.state.fruit_popup_score.path = "sprites/#{args.state.fruits[args.state.fruit].fruit}-bonus.png"
       args.state.render_queue << args.state.fruit_popup_score.dup
@@ -615,7 +615,7 @@ def check_pacman_hit_status(args)
       eaten_at: Kernel.tick_count
     }
     @show_ghost_bonus = :true
-    args.state.pacman.ghost_score *= 2      
+    args.state.pacman.ghost_score *= 2
   end
 
   # check if hit pinky
@@ -657,7 +657,7 @@ def check_pacman_hit_status(args)
       eaten_at: Kernel.tick_count
     }
     @show_ghost_bonus = :true
-    args.state.pacman.ghost_score *= 2      
+    args.state.pacman.ghost_score *= 2
   end
 
   # check if hit inky
@@ -746,7 +746,7 @@ def check_pacman_hit_status(args)
 
   if args.state.pacman.grid_x == args.state.blinky.grid_x && args.state.pacman.grid_y == args.state.blinky.grid_y && args.state.blinky.mode == :chase
     unless args.state.pacman_is_dead == true
-      args.state.pacman_is_dead = true 
+      args.state.pacman_is_dead = true
       args.state.death_start = Kernel.tick_count
       args.audio[:lifelost] ||= {
       input: 'sounds/lose-life.ogg',  # Filename
@@ -2095,7 +2095,7 @@ def draw_lives(args)
       y: 2,
       w: 6,
       h: 6,
-      path: "sprites/lowrez-pac-0.png",
+      path: "sprites/lowrez-pac-life.png",
       anchor_x: 0.5, # position horizontally at 0.5 of the sprite's width
       anchor_y: 0.5, # position vertically at 0.5 of the sprite's height
       angle: 0
@@ -2543,7 +2543,7 @@ def player_input(args)
 
   args.state.pacman.move_x = move_x
   args.state.pacman.move_y = move_y
-  
+
   #unless args.state.level_complete == true
     args.state.pacman.mx += move_x
     args.state.pacman.my += move_y
@@ -2660,7 +2660,7 @@ def draw_pacman_death_anim(args)
   #else
     #  sprite_index = 0
   end
-  
+
   # args.state.new_wave = nil
   # putz "sprite index: #{sprite_index}"
 
@@ -2686,7 +2686,7 @@ def draw_pacman_death_anim(args)
       args.state.new_wave = :true
       args.state.pacman.lives -= 1
       args.state.draw_fruit = :false
-      
+
       args.state.game_over = :true if args.state.pacman.lives < 0
 
       current_score = args.state.pacman.score
@@ -2696,11 +2696,11 @@ def draw_pacman_death_anim(args)
       args.state.pacman.score = current_score
       args.state.pacman_is_dead = nil unless args.state.game_over == :true
     end unless args.state.game_over == :true
-    
+
     if args.state.game_over == :true
       draw_game_over args
       # we stay here until the player releases a key
-      
+
       #if args.inputs.keyboard.keys.down_or_held.size > 1
         #putz "something is pressed or is held"
         #putz "keys: #{args.inputs.keyboard.keys}"
@@ -2711,8 +2711,8 @@ def draw_pacman_death_anim(args)
       #else
       #  puts60 "nothing pressed/held"
       #end
-      
-      if args.state.key_released 
+
+      if args.state.key_released
         # putz "a key is released"
         args.state.pacman_is_dead = nil
         args.state.game_over = nil
@@ -2729,9 +2729,9 @@ def draw_pacman_death_anim(args)
         args.state.bonus_active = nil
         args.state.bonus_timer = nil
       end
-        
+
       # keys: {:down=>[:left_arrow, :raw_key], :held=>[], :down_or_held=>[:left_arrow, :raw_key], :up=>[]}
-        
+
       if args.inputs.keyboard.keys.down_or_held.size > 1
         #putz "a key is pressed"
         #putz "keys: #{args.inputs.keyboard.keys}"
@@ -2781,7 +2781,7 @@ def render_debug(args)
   grid_highlight_blinky args
   grid_highlight_clyde args
   target_highlight_pinky args
-  
+
   # this is the point to determine which part of the grid red ghost is in
   args.lowrez.primitives << {
     x: (0 - args.state.pacman.mx) + args.state.blinky.x,
